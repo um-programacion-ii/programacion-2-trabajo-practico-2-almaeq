@@ -45,4 +45,14 @@ public class Usuario {
         this.ID = ID;
     }
 
+    @Override
+    public String toString() {
+        return "Usuario{" +
+                "nombre='" + nombre + '\'' +
+                ", apellido='" + apellido + '\'' +
+                ", email='" + email + '\'' +
+                ", ID=" + ID +
+                '}';
+    }
+
 }
