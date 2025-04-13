@@ -1,14 +1,14 @@
 package recursoDigital;
 
 public class Audiolibro implements RecursoDigital {
-    private String nombre;
+    private String titulo;
     private String identificador;
     private EstadoRecurso estado;
     private String narrador;
     private double duracion;
 
-    public Audiolibro(String nombre, String identificador, EstadoRecurso estado, String narrador, double duracion) {
-        this.nombre = nombre;
+    public Audiolibro(String titulo, String identificador, EstadoRecurso estado, String narrador, double duracion) {
+        this.titulo = titulo;
         this.identificador = identificador;
         this.estado = estado;
         this.narrador = narrador;
@@ -17,7 +17,7 @@ public class Audiolibro implements RecursoDigital {
 
     @Override
     public String getTitulo() {
-        return nombre;
+        return titulo;
     }
 
     @Override
