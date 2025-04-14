@@ -1,7 +1,7 @@
 package CLI;
 
-import recursoDigital.*;
-import usuario.GestorUsuario;
+import recursos.*;
+import gestores.GestorUsuario;
 import usuario.Usuario;
 
 import java.util.ArrayList;
@@ -87,15 +87,16 @@ public class CLI {
                 """);
         int tipo = Integer.parseInt(scanner.nextLine());
 
-        System.out.print("Identificador: ");
+        System.out.print("Título: ");
+        String titulo = scanner.nextLine();
+
+        System.out.print("Id: ");
         String id = scanner.nextLine();
 
         EstadoRecurso estado = EstadoRecurso.DISPONIBLE; // por defecto
 
         switch (tipo) {
             case 1 -> {
-                System.out.print("Título: ");
-                String titulo = scanner.nextLine();
                 System.out.print("Autor: ");
                 String autor = scanner.nextLine();
                 System.out.print("Cantidad de páginas: ");
@@ -105,17 +106,13 @@ public class CLI {
                 System.out.println("📘 Libro agregado.\n");
             }
             case 2 -> {
-                System.out.print("Nombre de la revista: ");
-                String nombre = scanner.nextLine();
                 System.out.print("Número de edición: ");
                 int numero = Integer.parseInt(scanner.nextLine());
 
-                recursos.add(new Revista(id, estado, nombre, numero));
+                recursos.add(new Revista(titulo, id, estado, numero));
                 System.out.println("📰 Revista agregada.\n");
             }
             case 3 -> {
-                System.out.print("Título: ");
-                String titulo = scanner.nextLine();
                 System.out.print("Narrador: ");
                 String narrador = scanner.nextLine();
                 System.out.print("Duración (horas): ");
@@ -134,21 +131,7 @@ public class CLI {
         } else {
             System.out.println("=== Recursos Digitales ===");
             for (RecursoDigital r : recursos) {
-                System.out.print("- " + r.getClass().getSimpleName() +
-                        " | ID: " + r.getIdentificador() +
-                        " | Estado: " + r.getEstado());
-
-                if (r instanceof Libro libro) {
-                    System.out.println(" | Autor: " + libro.getAutor() + " | Páginas: " + libro.getCant_paginas());
-                } else if (r instanceof Revista revista) {
-                    System.out.println(" | Nombre: " + revista.getTitulo() + " | Número: " + revista.getNumero());
-                } else if (r instanceof Audiolibro audiolibro) {
-                    System.out.println(" | Título: " + audiolibro.getTitulo() +
-                            " | Narrador: " + audiolibro.getNarrador() +
-                            " | Duración: " + audiolibro.getDuracion() + " hs");
-                } else {
-                    System.out.println();
-                }
+                System.out.println(r.mostrar());
             }
             System.out.println();
         }

@@ -1,4 +1,4 @@
-package recursoDigital;
+package gestores;
 
 public class GestorRecursos {
 }

@@ -1,6 +1,8 @@
-package recursoDigital;
+package interfaces;
 
-public interface RecursoDigital {
+import recursos.EstadoRecurso;
+
+public interface IRecursoDigital {
     String getTitulo();
     String getIdentificador();
     EstadoRecurso getEstado();

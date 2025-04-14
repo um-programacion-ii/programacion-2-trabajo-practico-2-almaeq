@@ -1,4 +1,4 @@
-package recursoDigital;
+package recursos;
 
 public enum EstadoRecurso {
     DISPONIBLE,
