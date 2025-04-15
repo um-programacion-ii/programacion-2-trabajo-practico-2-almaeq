@@ -1,12 +1,16 @@
 package CLI;
 
+import interfaces.Notificable;
 import recursos.*;
 import gestores.GestorUsuario;
 import gestores.GestorRecursos;
+import servicios.ServicioNotificaciones;
 import servicios.ServicioNotificacionesEmail;
 import servicios.ServicioNotificacionesSMS;
 import usuario.Usuario;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class CLI {
@@ -155,18 +159,25 @@ public class CLI {
         }
 
         // ✅ Inyectar notificaciones al recurso
-        if (recurso instanceof Libro libro) {
-            libro.agregarServicioNotificacion(new ServicioNotificacionesEmail());
-            libro.agregarServicioNotificacion(new ServicioNotificacionesSMS());
-            libro.setDestinatarioNotificacion(usuario.getEmail());
-        } else if (recurso instanceof Audiolibro audiolibro) {
-            audiolibro.agregarServicioNotificacion(new ServicioNotificacionesEmail());
-            audiolibro.setDestinatarioNotificacion(usuario.getEmail());
-        }
+        // preparar lista de notificaciones
+        // Crear los servicios
+        ServicioNotificacionesEmail email = new ServicioNotificacionesEmail();
+        ServicioNotificacionesSMS sms = new ServicioNotificacionesSMS();
+
+// Activar notificaciones para este usuario
+        email.activarNotificaciones(usuario.getEmail());
+        sms.activarNotificaciones(usuario.getEmail());
+
+// Armar lista
+        List<ServicioNotificaciones> servicios = new ArrayList<>();
+        servicios.add(email);
+        servicios.add(sms);
+
+// Configurar el recurso
+        recurso.configurarNotificaciones(servicios, usuario.getEmail());
 
         GestorRecursos.agregar(recurso);
     }
-
 
     private static void listarRecursosDigitales() {
         if (GestorRecursos.estaVacio()) {

@@ -1,6 +1,7 @@
 package recursos;
 
 
+import interfaces.Notificable;
 import interfaces.Prestable;
 import servicios.ServicioNotificaciones;
 
@@ -8,7 +9,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Audiolibro extends RecursoDigital implements Prestable {
+public class Audiolibro extends RecursoDigital implements Prestable, Notificable {
     private String narrador;
     private double duracion;
     private boolean prestado = false;
@@ -89,6 +90,9 @@ public class Audiolibro extends RecursoDigital implements Prestable {
     }
 
     @Override
+    public void renovarSiEsPosible() {}
+
+    @Override
     public void devolverSiEsPosible() {
         if (estaPrestado()) {
             devolver();
@@ -121,5 +125,19 @@ public class Audiolibro extends RecursoDigital implements Prestable {
                 servicio.enviarNotificacion(destinatarioNotificacion, mensaje);
             }
         }
+    }
+
+    @Override
+    public void configurarNotificaciones(ServicioNotificaciones servicio, String destinatario) {
+        agregarServicioNotificacion(servicio);
+        setDestinatarioNotificacion(destinatario);
+    }
+
+    @Override
+    public void configurarNotificaciones(List<ServicioNotificaciones> servicios, String destinatario) {
+        for (ServicioNotificaciones servicio : servicios) {
+            agregarServicioNotificacion(servicio);
+        }
+        setDestinatarioNotificacion(destinatario);
     }
 }

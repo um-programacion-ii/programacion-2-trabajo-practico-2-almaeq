@@ -1,6 +1,9 @@
 package recursos;
 
 import interfaces.IRecursoDigital;
+import servicios.ServicioNotificaciones;
+
+import java.util.List;
 
 public abstract class RecursoDigital implements IRecursoDigital {
     protected String titulo;
@@ -33,18 +36,18 @@ public abstract class RecursoDigital implements IRecursoDigital {
         this.estado = estado;
     }
 
-    public void prestarSiEsPosible() {
-        System.out.println("❌ El recurso no puede ser prestado.");
+    // ✅ Estos métodos deben ser abstractos para que se llamen desde las subclases
+    public abstract void prestarSiEsPosible();
+
+    public abstract void devolverSiEsPosible();
+
+    public abstract void renovarSiEsPosible();
+
+    public void configurarNotificaciones(ServicioNotificaciones servicio, String destinatario) {
     }
 
-    public void devolverSiEsPosible() {
-        System.out.println("❌ El recurso no puede ser devuelto.");
+    public void configurarNotificaciones(List<ServicioNotificaciones> servicios, String destinatario) {
     }
 
-    public void renovarSiEsPosible() {
-        System.out.println("❌ El recurso no es renovable.");
-    }
-
-    // Método abstracto para mostrar información personalizada
     public abstract String mostrar();
 }

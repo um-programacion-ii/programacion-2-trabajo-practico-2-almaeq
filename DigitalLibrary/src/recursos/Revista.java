@@ -1,5 +1,6 @@
 package recursos;
 
+import interfaces.Notificable;
 import interfaces.Renovable;
 import interfaces.Prestable;
 import servicios.ServicioNotificaciones;
@@ -9,7 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Revista extends RecursoDigital implements Renovable, Prestable {
+public class Revista extends RecursoDigital implements Renovable, Prestable, Notificable {
     private int numero;private boolean prestado = false;
     private LocalDate fechaPrestamo;
     private LocalDate fechaDevolucion;
@@ -139,6 +140,20 @@ public class Revista extends RecursoDigital implements Renovable, Prestable {
                 servicio.enviarNotificacion(destinatarioNotificacion, mensaje);
             }
         }
+    }
+
+    @Override
+    public void configurarNotificaciones(ServicioNotificaciones servicio, String destinatario) {
+        agregarServicioNotificacion(servicio);
+        setDestinatarioNotificacion(destinatario);
+    }
+
+    @Override
+    public void configurarNotificaciones(List<ServicioNotificaciones> servicios, String destinatario) {
+        for (ServicioNotificaciones servicio : servicios) {
+            agregarServicioNotificacion(servicio);
+        }
+        setDestinatarioNotificacion(destinatario);
     }
 
 }

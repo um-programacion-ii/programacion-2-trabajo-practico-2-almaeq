@@ -1,22 +1,28 @@
 package servicios;
 
-public class ServicioNotificacionesEmail implements ServicioNotificaciones{
-    private boolean activado = false;
+import java.util.HashSet;
+import java.util.Set;
+
+public class ServicioNotificacionesEmail implements ServicioNotificaciones {
+
+    private final Set<String> usuariosActivos = new HashSet<>();
 
     @Override
     public void enviarNotificacion(String destinatario, String mensaje) {
-        System.out.println("Enviando notificación por email a: " + destinatario);
-        System.out.println(mensaje);
+        System.out.println("📧 Email a " + destinatario + ": " + mensaje);
     }
 
     @Override
     public void desactivarNotificaciones(String usuario) {
-        System.out.println("Desactivando notificaciones por email para: " + usuario);
-        activado = false;
+        usuariosActivos.remove(usuario);
     }
 
     @Override
     public boolean estaActivo(String usuario) {
-        return activado;
+        return usuariosActivos.contains(usuario);
+    }
+
+    public void activarNotificaciones(String usuario) {
+        usuariosActivos.add(usuario);
     }
 }

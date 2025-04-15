@@ -1,5 +1,6 @@
 package recursos;
 
+import interfaces.Notificable;
 import interfaces.Prestable;
 import interfaces.Renovable;
 import servicios.ServicioNotificaciones;
@@ -8,7 +9,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Libro extends RecursoDigital implements Prestable, Renovable {
+public class Libro extends RecursoDigital implements Prestable, Renovable, Notificable {
     private int cant_paginas;
     private String autor;
     private boolean prestado = false;
@@ -145,10 +146,25 @@ public class Libro extends RecursoDigital implements Prestable, Renovable {
     }
 
     private void notificar(String mensaje) {
+
         for (ServicioNotificaciones servicio : serviciosNotificaciones) {
             if (destinatarioNotificacion != null && servicio.estaActivo(destinatarioNotificacion)) {
                 servicio.enviarNotificacion(destinatarioNotificacion, mensaje);
             }
         }
+    }
+
+    @Override
+    public void configurarNotificaciones(ServicioNotificaciones servicio, String destinatario) {
+        agregarServicioNotificacion(servicio);
+        setDestinatarioNotificacion(destinatario);
+    }
+
+    @Override
+    public void configurarNotificaciones(List<ServicioNotificaciones> servicios, String destinatario) {
+        for (ServicioNotificaciones servicio : servicios) {
+            agregarServicioNotificacion(servicio);
+        }
+        setDestinatarioNotificacion(destinatario);
     }
 }
