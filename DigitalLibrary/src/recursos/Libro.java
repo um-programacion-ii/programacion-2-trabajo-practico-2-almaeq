@@ -2,8 +2,11 @@ package recursos;
 
 import interfaces.Prestable;
 import interfaces.Renovable;
+import servicios.ServicioNotificaciones;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Libro extends RecursoDigital implements Prestable, Renovable {
     private int cant_paginas;
@@ -13,12 +16,17 @@ public class Libro extends RecursoDigital implements Prestable, Renovable {
     private LocalDate fechaDevolucion;
     private int renovacionesDisponibles = 1;
 
+    private final List<ServicioNotificaciones> serviciosNotificaciones = new ArrayList<>();
+    private String destinatarioNotificacion;
+
+
     public Libro(String titulo, String identificador, EstadoRecurso estado, int cant_paginas, String autor) {
         super(titulo, identificador, estado);
         this.cant_paginas = cant_paginas;
         this.autor = autor;
     }
 
+    // === GETTERS Y SETTERS ===
     public int getCant_paginas() {
         return cant_paginas;
     }
@@ -35,6 +43,7 @@ public class Libro extends RecursoDigital implements Prestable, Renovable {
         this.autor = autor;
     }
 
+    // === MÉTODOS DE INTERFACES ===
     @Override
     public boolean estaPrestado() {
         return prestado;
@@ -48,6 +57,7 @@ public class Libro extends RecursoDigital implements Prestable, Renovable {
             fechaPrestamo = LocalDate.now();
             fechaDevolucion = null;
             renovacionesDisponibles = 1; // resetear
+            notificar("📘 Se prestó el libro: " + getTitulo());
         }
     }
 
@@ -57,6 +67,7 @@ public class Libro extends RecursoDigital implements Prestable, Renovable {
             prestado = false;
             estado = EstadoRecurso.DISPONIBLE;
             fechaDevolucion = LocalDate.now();
+            notificar("📘 Se devolvió el libro: " + getTitulo());
         }
     }
 
@@ -80,6 +91,7 @@ public class Libro extends RecursoDigital implements Prestable, Renovable {
         if (puedeRenovarse()) {
             fechaPrestamo = LocalDate.now();
             renovacionesDisponibles--;
+            notificar("🔁 Se renovó el libro: " + getTitulo());
             System.out.println("🔁 Libro renovado con éxito.");
         } else {
             System.out.println("⚠️ No sea puede renovar el libro.");
@@ -121,5 +133,22 @@ public class Libro extends RecursoDigital implements Prestable, Renovable {
                 ? " (Prestado desde: " + fechaPrestamo + (puedeRenovarse() ? ", renovable" : ", sin renovaciones") + ")"
                 : (fechaDevolucion != null ? " (Devuelto el: " + fechaDevolucion + ")" : "");
         return "📘 Libro - " + titulo + " | Autor: " + autor + " | Páginas: " + cant_paginas + " | Estado: " + estado + prestamoInfo;
+    }
+
+    // === MÉTODOS PARA NOTIFICACIONES ===
+    public void agregarServicioNotificacion(ServicioNotificaciones servicio) {
+        this.serviciosNotificaciones.add(servicio);
+    }
+
+    public void setDestinatarioNotificacion(String destinatario) {
+        this.destinatarioNotificacion = destinatario;
+    }
+
+    private void notificar(String mensaje) {
+        for (ServicioNotificaciones servicio : serviciosNotificaciones) {
+            if (destinatarioNotificacion != null && servicio.estaActivo(destinatarioNotificacion)) {
+                servicio.enviarNotificacion(destinatarioNotificacion, mensaje);
+            }
+        }
     }
 }
