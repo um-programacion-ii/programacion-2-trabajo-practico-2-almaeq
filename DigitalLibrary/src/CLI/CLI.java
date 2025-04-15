@@ -3,6 +3,8 @@ package CLI;
 import recursos.*;
 import gestores.GestorUsuario;
 import gestores.GestorRecursos;
+import servicios.ServicioNotificacionesEmail;
+import servicios.ServicioNotificacionesSMS;
 import usuario.Usuario;
 
 import java.util.Scanner;
@@ -82,12 +84,32 @@ public class CLI {
     }
 
     private static void crearRecursoDigital() {
+        if (GestorUsuario.estaVacio()) {
+            System.out.println("⚠️ No hay usuarios registrados. Cree uno primero.\n");
+            return;
+        }
+
+        // ✅ Elegir usuario responsable
+        System.out.println("Seleccione un usuario por ID:");
+        for (Usuario u : GestorUsuario.listar()) {
+            System.out.println("- ID: " + u.getID() + " | " + u.getNombre() + " " + u.getApellido());
+        }
+
+        int userId = Integer.parseInt(scanner.nextLine());
+        Usuario usuario = GestorUsuario.buscarPorId(userId);
+
+        if (usuario == null) {
+            System.out.println("❌ Usuario no encontrado.");
+            return;
+        }
+
+        // ✅ Datos comunes del recurso
         System.out.println("""
-                Tipo de recurso:
-                1. Libro
-                2. Revista
-                3. Audiolibro
-                """);
+            Tipo de recurso:
+            1. Libro
+            2. Revista
+            3. Audiolibro
+            """);
         int tipo = Integer.parseInt(scanner.nextLine());
 
         System.out.print("Título: ");
@@ -98,6 +120,8 @@ public class CLI {
 
         EstadoRecurso estado = EstadoRecurso.DISPONIBLE;
 
+        RecursoDigital recurso = null;
+
         switch (tipo) {
             case 1 -> {
                 System.out.print("Autor: ");
@@ -105,14 +129,14 @@ public class CLI {
                 System.out.print("Cantidad de páginas: ");
                 int paginas = Integer.parseInt(scanner.nextLine());
 
-                GestorRecursos.agregar(new Libro(titulo, id, estado, paginas, autor));
+                recurso = new Libro(titulo, id, estado, paginas, autor);
                 System.out.println("📘 Libro agregado.\n");
             }
             case 2 -> {
                 System.out.print("Número de edición: ");
                 int numero = Integer.parseInt(scanner.nextLine());
 
-                GestorRecursos.agregar(new Revista(titulo, id, estado, numero));
+                recurso = new Revista(titulo, id, estado, numero);
                 System.out.println("📰 Revista agregada.\n");
             }
             case 3 -> {
@@ -121,12 +145,28 @@ public class CLI {
                 System.out.print("Duración (horas): ");
                 double duracion = Double.parseDouble(scanner.nextLine());
 
-                GestorRecursos.agregar(new Audiolibro(titulo, id, estado, narrador, duracion));
+                recurso = new Audiolibro(titulo, id, estado, narrador, duracion);
                 System.out.println("🎧 Audiolibro agregado.\n");
             }
-            default -> System.out.println("❌ Tipo inválido.\n");
+            default -> {
+                System.out.println("❌ Tipo inválido.\n");
+                return;
+            }
         }
+
+        // ✅ Inyectar notificaciones al recurso
+        if (recurso instanceof Libro libro) {
+            libro.agregarServicioNotificacion(new ServicioNotificacionesEmail());
+            libro.agregarServicioNotificacion(new ServicioNotificacionesSMS());
+            libro.setDestinatarioNotificacion(usuario.getEmail());
+        } else if (recurso instanceof Audiolibro audiolibro) {
+            audiolibro.agregarServicioNotificacion(new ServicioNotificacionesEmail());
+            audiolibro.setDestinatarioNotificacion(usuario.getEmail());
+        }
+
+        GestorRecursos.agregar(recurso);
     }
+
 
     private static void listarRecursosDigitales() {
         if (GestorRecursos.estaVacio()) {
