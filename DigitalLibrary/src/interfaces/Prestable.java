@@ -2,7 +2,7 @@ package interfaces;
 
 import java.time.LocalDate;
 
-public interface Pretable {
+public interface Prestable {
     boolean estaPrestado();
     void prestar();
     void devolver();
