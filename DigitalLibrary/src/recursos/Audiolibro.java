@@ -1,16 +1,23 @@
 package recursos;
 
 
+import interfaces.Notificable;
 import interfaces.Prestable;
+import servicios.ServicioNotificaciones;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Audiolibro extends RecursoDigital implements Prestable {
+public class Audiolibro extends RecursoDigital implements Prestable, Notificable {
     private String narrador;
     private double duracion;
     private boolean prestado = false;
     private LocalDate fechaPrestamo;
     private LocalDate fechaDevolucion;
+
+    private final List<ServicioNotificaciones> serviciosNotificaciones = new ArrayList<>();
+    private String destinatarioNotificacion;
 
     public Audiolibro(String titulo, String identificador, EstadoRecurso estado, String narrador, double duracion) {
         super(titulo, identificador, estado);
@@ -18,6 +25,7 @@ public class Audiolibro extends RecursoDigital implements Prestable {
         this.duracion = duracion;
     }
 
+    // === GETTERS Y SETTERS ===
     public String getNarrador() {
         return narrador;
     }
@@ -34,6 +42,7 @@ public class Audiolibro extends RecursoDigital implements Prestable {
         this.duracion = duracion;
     }
 
+    // === MÉTODOS DE INTERFACES ===
     @Override
     public boolean estaPrestado() {
         return prestado;
@@ -46,6 +55,7 @@ public class Audiolibro extends RecursoDigital implements Prestable {
             estado = EstadoRecurso.PRESTADO;
             fechaPrestamo = LocalDate.now();
             fechaDevolucion = null;
+            notificar("📘 Se prestó el audiolibro: " + getTitulo());
         }
     }
 
@@ -55,6 +65,7 @@ public class Audiolibro extends RecursoDigital implements Prestable {
             prestado = false;
             estado = EstadoRecurso.DISPONIBLE;
             fechaDevolucion = LocalDate.now();
+            notificar("📘 Se devolvió el audiolibro: " + getTitulo());
         }
     }
 
@@ -79,6 +90,9 @@ public class Audiolibro extends RecursoDigital implements Prestable {
     }
 
     @Override
+    public void renovarSiEsPosible() {}
+
+    @Override
     public void devolverSiEsPosible() {
         if (estaPrestado()) {
             devolver();
@@ -94,5 +108,36 @@ public class Audiolibro extends RecursoDigital implements Prestable {
                 ? " (Prestado desde: " + fechaPrestamo + ")"
                 : (fechaDevolucion != null ? " (Devuelto el: " + fechaDevolucion + ")" : "");
         return "🎧 Audiolibro - " + titulo + " | Narrador: " + narrador + " | Duración: " + duracion + " hs | Estado: " + estado+ prestamoInfo;
+    }
+
+    // === MÉTODOS PARA NOTIFICACIONES ===
+    public void agregarServicioNotificacion(ServicioNotificaciones servicio) {
+        this.serviciosNotificaciones.add(servicio);
+    }
+
+    public void setDestinatarioNotificacion(String destinatario) {
+        this.destinatarioNotificacion = destinatario;
+    }
+
+    private void notificar(String mensaje) {
+        for (ServicioNotificaciones servicio : serviciosNotificaciones) {
+            if (destinatarioNotificacion != null && servicio.estaActivo(destinatarioNotificacion)) {
+                servicio.enviarNotificacion(destinatarioNotificacion, mensaje);
+            }
+        }
+    }
+
+    @Override
+    public void configurarNotificaciones(ServicioNotificaciones servicio, String destinatario) {
+        agregarServicioNotificacion(servicio);
+        setDestinatarioNotificacion(destinatario);
+    }
+
+    @Override
+    public void configurarNotificaciones(List<ServicioNotificaciones> servicios, String destinatario) {
+        for (ServicioNotificaciones servicio : servicios) {
+            agregarServicioNotificacion(servicio);
+        }
+        setDestinatarioNotificacion(destinatario);
     }
 }

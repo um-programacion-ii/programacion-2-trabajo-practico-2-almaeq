@@ -1,16 +1,20 @@
 package CLI;
 
+import interfaces.Notificable;
 import recursos.*;
 import gestores.GestorUsuario;
+import gestores.GestorRecursos;
+import servicios.ServicioNotificaciones;
+import servicios.ServicioNotificacionesEmail;
+import servicios.ServicioNotificacionesSMS;
 import usuario.Usuario;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class CLI {
 
-    private static final ArrayList<Usuario> usuarios = new ArrayList<>();
-    private static final ArrayList<RecursoDigital> recursos = new ArrayList<>();
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void iniciar() {
@@ -67,17 +71,16 @@ public class CLI {
         System.out.print("ID (número): ");
         int id = Integer.parseInt(scanner.nextLine());
 
-        Usuario nuevo = GestorUsuario.getUsuario(nombre, apellido, email, id);
-        usuarios.add(nuevo);
+        GestorUsuario.getUsuario(nombre, apellido, email, id);
         System.out.println("✅ Usuario creado con éxito.\n");
     }
 
     private static void listarUsuarios() {
-        if (usuarios.isEmpty()) {
+        if (GestorUsuario.estaVacio()) {
             System.out.println("⚠️ No hay usuarios cargados.\n");
         } else {
             System.out.println("=== Lista de Usuarios ===");
-            for (Usuario u : usuarios) {
+            for (Usuario u : GestorUsuario.listar()) {
                 System.out.println(u);
             }
             System.out.println();
@@ -85,12 +88,32 @@ public class CLI {
     }
 
     private static void crearRecursoDigital() {
+        if (GestorUsuario.estaVacio()) {
+            System.out.println("⚠️ No hay usuarios registrados. Cree uno primero.\n");
+            return;
+        }
+
+        // ✅ Elegir usuario responsable
+        System.out.println("Seleccione un usuario por ID:");
+        for (Usuario u : GestorUsuario.listar()) {
+            System.out.println("- ID: " + u.getID() + " | " + u.getNombre() + " " + u.getApellido());
+        }
+
+        int userId = Integer.parseInt(scanner.nextLine());
+        Usuario usuario = GestorUsuario.buscarPorId(userId);
+
+        if (usuario == null) {
+            System.out.println("❌ Usuario no encontrado.");
+            return;
+        }
+
+        // ✅ Datos comunes del recurso
         System.out.println("""
-                Tipo de recurso:
-                1. Libro
-                2. Revista
-                3. Audiolibro
-                """);
+            Tipo de recurso:
+            1. Libro
+            2. Revista
+            3. Audiolibro
+            """);
         int tipo = Integer.parseInt(scanner.nextLine());
 
         System.out.print("Título: ");
@@ -99,7 +122,9 @@ public class CLI {
         System.out.print("Id: ");
         String id = scanner.nextLine();
 
-        EstadoRecurso estado = EstadoRecurso.DISPONIBLE; // por defecto
+        EstadoRecurso estado = EstadoRecurso.DISPONIBLE;
+
+        RecursoDigital recurso = null;
 
         switch (tipo) {
             case 1 -> {
@@ -108,14 +133,14 @@ public class CLI {
                 System.out.print("Cantidad de páginas: ");
                 int paginas = Integer.parseInt(scanner.nextLine());
 
-                recursos.add(new Libro(titulo, id, estado, paginas, autor));
+                recurso = new Libro(titulo, id, estado, paginas, autor);
                 System.out.println("📘 Libro agregado.\n");
             }
             case 2 -> {
                 System.out.print("Número de edición: ");
                 int numero = Integer.parseInt(scanner.nextLine());
 
-                recursos.add(new Revista(titulo, id, estado, numero));
+                recurso = new Revista(titulo, id, estado, numero);
                 System.out.println("📰 Revista agregada.\n");
             }
             case 3 -> {
@@ -124,19 +149,42 @@ public class CLI {
                 System.out.print("Duración (horas): ");
                 double duracion = Double.parseDouble(scanner.nextLine());
 
-                recursos.add(new Audiolibro(titulo, id, estado, narrador, duracion));
+                recurso = new Audiolibro(titulo, id, estado, narrador, duracion);
                 System.out.println("🎧 Audiolibro agregado.\n");
             }
-            default -> System.out.println("❌ Tipo inválido.\n");
+            default -> {
+                System.out.println("❌ Tipo inválido.\n");
+                return;
+            }
         }
+
+        // ✅ Inyectar notificaciones al recurso
+        // preparar lista de notificaciones
+        // Crear los servicios
+        ServicioNotificacionesEmail email = new ServicioNotificacionesEmail();
+        ServicioNotificacionesSMS sms = new ServicioNotificacionesSMS();
+
+// Activar notificaciones para este usuario
+        email.activarNotificaciones(usuario.getEmail());
+        sms.activarNotificaciones(usuario.getEmail());
+
+// Armar lista
+        List<ServicioNotificaciones> servicios = new ArrayList<>();
+        servicios.add(email);
+        servicios.add(sms);
+
+// Configurar el recurso
+        recurso.configurarNotificaciones(servicios, usuario.getEmail());
+
+        GestorRecursos.agregar(recurso);
     }
 
     private static void listarRecursosDigitales() {
-        if (recursos.isEmpty()) {
+        if (GestorRecursos.estaVacio()) {
             System.out.println("⚠️ No hay recursos digitales cargados.\n");
         } else {
             System.out.println("=== Recursos Digitales ===");
-            for (RecursoDigital r : recursos) {
+            for (RecursoDigital r : GestorRecursos.listar()) {
                 System.out.println(r.mostrar());
             }
             System.out.println();
@@ -147,7 +195,7 @@ public class CLI {
         System.out.print("Ingrese el ID del recurso a prestar: ");
         String id = scanner.nextLine();
 
-        RecursoDigital encontrado = buscarPorId(id);
+        RecursoDigital encontrado = GestorRecursos.buscarPorId(id);
         if (encontrado != null) {
             encontrado.prestarSiEsPosible();
         } else {
@@ -159,7 +207,7 @@ public class CLI {
         System.out.print("Ingrese el ID del recurso a devolver: ");
         String id = scanner.nextLine();
 
-        RecursoDigital encontrado = buscarPorId(id);
+        RecursoDigital encontrado = GestorRecursos.buscarPorId(id);
         if (encontrado != null) {
             encontrado.devolverSiEsPosible();
         } else {
@@ -171,20 +219,11 @@ public class CLI {
         System.out.print("Ingrese el ID del recurso a renovar: ");
         String id = scanner.nextLine();
 
-        RecursoDigital encontrado = buscarPorId(id);
+        RecursoDigital encontrado = GestorRecursos.buscarPorId(id);
         if (encontrado != null) {
             encontrado.renovarSiEsPosible();
         } else {
             System.out.println("❌ Recurso no encontrado.");
         }
-    }
-
-    private static RecursoDigital buscarPorId(String id) {
-        for (RecursoDigital r : recursos) {
-            if (r.getIdentificador().equalsIgnoreCase(id)) {
-                return r;
-            }
-        }
-        return null;
     }
 }
