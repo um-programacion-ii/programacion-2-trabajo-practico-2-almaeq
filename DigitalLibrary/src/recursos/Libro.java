@@ -82,7 +82,36 @@ public class Libro extends RecursoDigital implements Prestable, Renovable {
             renovacionesDisponibles--;
             System.out.println("🔁 Libro renovado con éxito.");
         } else {
-            System.out.println("⚠️ No se puede renovar el libro.");
+            System.out.println("⚠️ No sea puede renovar el libro.");
+        }
+    }
+
+    @Override
+    public void prestarSiEsPosible() {
+        if (!estaPrestado()) {
+            prestar();
+            System.out.println("✅ Recurso prestado con éxito.");
+        } else {
+            System.out.println("⚠️ El recurso ya está prestado.");
+        }
+    }
+
+    @Override
+    public void devolverSiEsPosible() {
+        if (estaPrestado()) {
+            devolver();
+            System.out.println("✅ Recurso devuelto con éxito.");
+        } else {
+            System.out.println("⚠️ El recurso no estaba prestado.");
+        }
+    }
+
+    @Override
+    public void renovarSiEsPosible() {
+        if (puedeRenovarse()) {
+            renovar();
+        } else {
+            System.out.println("⚠️ El recurso no puede renovarse en este momento.");
         }
     }
 

@@ -69,6 +69,26 @@ public class Audiolibro extends RecursoDigital implements Prestable {
     }
 
     @Override
+    public void prestarSiEsPosible() {
+        if (!estaPrestado()) {
+            prestar();
+            System.out.println("✅ Recurso prestado con éxito.");
+        } else {
+            System.out.println("⚠️ El recurso ya está prestado.");
+        }
+    }
+
+    @Override
+    public void devolverSiEsPosible() {
+        if (estaPrestado()) {
+            devolver();
+            System.out.println("✅ Recurso devuelto con éxito.");
+        } else {
+            System.out.println("⚠️ El recurso no estaba prestado.");
+        }
+    }
+
+    @Override
     public String mostrar() {
         String prestamoInfo = prestado
                 ? " (Prestado desde: " + fechaPrestamo + ")"

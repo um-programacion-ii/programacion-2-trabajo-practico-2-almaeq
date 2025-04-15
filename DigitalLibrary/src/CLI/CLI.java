@@ -29,11 +29,14 @@ public class CLI {
                 case 2 -> listarUsuarios();
                 case 3 -> crearRecursoDigital();
                 case 4 -> listarRecursosDigitales();
-                case 5 -> System.out.println("Saliendo...");
+                case 5 -> prestarRecurso();
+                case 6 -> devolverRecurso();
+                case 7 -> renovarRecurso();
+                case 8 -> System.out.println("Saliendo...");
                 default -> System.out.println("❌ Opción inválida.\n");
             }
 
-        } while (opcion != 5);
+        } while (opcion != 8);
     }
 
     private static void mostrarMenu() {
@@ -43,7 +46,10 @@ public class CLI {
                 2. Listar Usuarios
                 3. Crear Recurso Digital
                 4. Listar Recursos Digitales
-                5. Salir
+                5. Prestar Recurso
+                6. Devolver Recurso
+                7. Renovar Recurso
+                8. Salir
                 Ingrese una opción:
                 """);
     }
@@ -135,5 +141,50 @@ public class CLI {
             }
             System.out.println();
         }
+    }
+
+    private static void prestarRecurso() {
+        System.out.print("Ingrese el ID del recurso a prestar: ");
+        String id = scanner.nextLine();
+
+        RecursoDigital encontrado = buscarPorId(id);
+        if (encontrado != null) {
+            encontrado.prestarSiEsPosible();
+        } else {
+            System.out.println("❌ Recurso no encontrado.");
+        }
+    }
+
+    private static void devolverRecurso() {
+        System.out.print("Ingrese el ID del recurso a devolver: ");
+        String id = scanner.nextLine();
+
+        RecursoDigital encontrado = buscarPorId(id);
+        if (encontrado != null) {
+            encontrado.devolverSiEsPosible();
+        } else {
+            System.out.println("❌ Recurso no encontrado.");
+        }
+    }
+
+    private static void renovarRecurso() {
+        System.out.print("Ingrese el ID del recurso a renovar: ");
+        String id = scanner.nextLine();
+
+        RecursoDigital encontrado = buscarPorId(id);
+        if (encontrado != null) {
+            encontrado.renovarSiEsPosible();
+        } else {
+            System.out.println("❌ Recurso no encontrado.");
+        }
+    }
+
+    private static RecursoDigital buscarPorId(String id) {
+        for (RecursoDigital r : recursos) {
+            if (r.getIdentificador().equalsIgnoreCase(id)) {
+                return r;
+            }
+        }
+        return null;
     }
 }

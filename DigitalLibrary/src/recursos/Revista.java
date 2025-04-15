@@ -77,6 +77,35 @@ public class Revista extends RecursoDigital implements Renovable, Prestable {
     }
 
     @Override
+    public void prestarSiEsPosible() {
+        if (!estaPrestado()) {
+            prestar();
+            System.out.println("✅ Recurso prestado con éxito.");
+        } else {
+            System.out.println("⚠️ El recurso ya está prestado.");
+        }
+    }
+
+    @Override
+    public void devolverSiEsPosible() {
+        if (estaPrestado()) {
+            devolver();
+            System.out.println("✅ Recurso devuelto con éxito.");
+        } else {
+            System.out.println("⚠️ El recurso no estaba prestado.");
+        }
+    }
+
+    @Override
+    public void renovarSiEsPosible() {
+        if (puedeRenovarse()) {
+            renovar();
+        } else {
+            System.out.println("⚠️ El recurso no puede renovarse en este momento.");
+        }
+    }
+
+    @Override
     public String mostrar() {
         String prestamoInfo = prestado
                 ? " (Prestado desde: " + fechaPrestamo + (puedeRenovarse() ? ", renovable" : ", sin renovaciones") + ")"
