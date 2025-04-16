@@ -3,17 +3,16 @@ package gestores;
 import recursos.RecursoDigital;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class GestorRecursos {
 
-    private static final List<RecursoDigital> recursos = new ArrayList<>();
+    private static final ArrayList<RecursoDigital> recursos = new ArrayList<>();
 
     public static void agregar(RecursoDigital recurso) {
         recursos.add(recurso);
     }
 
-    public static List<RecursoDigital> listar() {
+    public static ArrayList<RecursoDigital> listar() {
         return recursos;
     }
 
