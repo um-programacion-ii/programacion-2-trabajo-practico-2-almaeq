@@ -1,5 +1,7 @@
 package gestores;
 
+import enums.CategoriaRecurso;
+import enums.EstadoRecurso;
 import recursos.*;
 import utils.Comparadores;
 
@@ -24,7 +26,6 @@ public class GestorRecursos {
         return recursos.isEmpty();
     }
 
-    // ✅ Buscar por ID (case-insensitive)
     public static RecursoDigital buscarPorId(String id) {
         return recursos.stream()
                 .filter(r -> r.getIdentificador().equalsIgnoreCase(id))
@@ -32,7 +33,6 @@ public class GestorRecursos {
                 .orElse(null);
     }
 
-    // ✅ Buscar por TÍTULO exacto (ignore case)
     public static RecursoDigital buscarPorTitulo(String titulo) {
         return recursos.stream()
                 .filter(r -> r.getTitulo().equalsIgnoreCase(titulo))
@@ -40,7 +40,6 @@ public class GestorRecursos {
                 .orElse(null);
     }
 
-    // ✅ Buscar recursos que contengan un fragmento del título (ignore case)
     public static List<RecursoDigital> buscarPorFragmentoTitulo(String fragmento) {
         String f = fragmento.toLowerCase();
         return recursos.stream()
@@ -48,11 +47,18 @@ public class GestorRecursos {
                 .collect(Collectors.toList());
     }
 
-    // ✅ Buscar por tipo de recurso (Libro, Revista, Audiolibro...)
     public static List<RecursoDigital> buscarPorTipo(Class<?> tipo) {
         return recursos.stream()
                 .filter(tipo::isInstance)
                 .collect(Collectors.toList());
+    }
+
+    public static List<RecursoDigital> buscarPorCategoria(CategoriaRecurso categoria) {
+        return switch (categoria) {
+            case LIBRO -> buscarPorTipo(Libro.class);
+            case REVISTA -> buscarPorTipo(Revista.class);
+            case AUDIOLIBRO -> buscarPorTipo(Audiolibro.class);
+        };
     }
 
     public static void mostrarListado() {
@@ -65,28 +71,27 @@ public class GestorRecursos {
         }
     }
 
-    public static RecursoDigital crearRecurso(int tipo, String titulo, String id, EstadoRecurso estado, Scanner scanner) {
-        return switch (tipo) {
-            case 1 -> {
+    public static RecursoDigital crearRecurso(CategoriaRecurso categoria, String titulo, String id, EstadoRecurso estado, Scanner scanner) {
+        return switch (categoria) {
+            case LIBRO -> {
                 System.out.print("Autor: ");
                 String autor = scanner.nextLine();
                 System.out.print("Cantidad de páginas: ");
                 int paginas = Integer.parseInt(scanner.nextLine());
                 yield new Libro(titulo, id, estado, paginas, autor);
             }
-            case 2 -> {
+            case REVISTA -> {
                 System.out.print("Número de edición: ");
                 int numero = Integer.parseInt(scanner.nextLine());
                 yield new Revista(titulo, id, estado, numero);
             }
-            case 3 -> {
+            case AUDIOLIBRO -> {
                 System.out.print("Narrador: ");
                 String narrador = scanner.nextLine();
                 System.out.print("Duración (horas): ");
                 double duracion = Double.parseDouble(scanner.nextLine());
                 yield new Audiolibro(titulo, id, estado, narrador, duracion);
             }
-            default -> null;
         };
     }
 
@@ -107,5 +112,4 @@ public class GestorRecursos {
                 .sorted(Comparadores.POR_RENOVABLE)
                 .toList();
     }
-
 }

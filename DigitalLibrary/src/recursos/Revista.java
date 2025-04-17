@@ -1,5 +1,6 @@
 package recursos;
 
+import enums.EstadoRecurso;
 import interfaces.Notificable;
 import interfaces.Renovable;
 import interfaces.Prestable;
@@ -19,7 +20,7 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
     private final List<ServicioNotificaciones> serviciosNotificaciones = new ArrayList<>();
     private String destinatarioNotificacion;
 
-    public Revista(String titulo, String identificador, EstadoRecurso estado, int numero) {
+    public Revista(String titulo, String identificador, enums.EstadoRecurso estado, int numero) {
         super(titulo, identificador, estado);
         this.numero = numero;
     }

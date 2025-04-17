@@ -1,5 +1,7 @@
 package CLI;
 
+import enums.CategoriaRecurso;
+import enums.EstadoRecurso;
 import recursos.*;
 import gestores.GestorUsuario;
 import gestores.GestorRecursos;
@@ -141,8 +143,9 @@ public class CLI {
         System.out.print("Id: ");
         String id = scanner.nextLine();
 
+        CategoriaRecurso categoria = CategoriaRecurso.valueOf(categoriaStr);
         EstadoRecurso estado = EstadoRecurso.DISPONIBLE;
-        RecursoDigital recurso = GestorRecursos.crearRecurso(tipo, titulo, id, estado, scanner);
+        RecursoDigital recurso = GestorRecursos.crearRecurso(categoria, titulo, id, estado, scanner);
 
         GestorRecursos.agregar(recurso);
         System.out.println("✅ Recurso agregado con éxito.\n");

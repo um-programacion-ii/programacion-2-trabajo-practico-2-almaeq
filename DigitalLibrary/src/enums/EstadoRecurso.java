@@ -1,4 +1,4 @@
-package recursos;
+package enums;
 
 public enum EstadoRecurso {
     DISPONIBLE,

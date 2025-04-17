@@ -1,6 +1,7 @@
 package recursos;
 
 
+import enums.EstadoRecurso;
 import interfaces.Notificable;
 import interfaces.Prestable;
 import servicios.ServicioNotificaciones;
@@ -19,7 +20,7 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
     private final List<ServicioNotificaciones> serviciosNotificaciones = new ArrayList<>();
     private String destinatarioNotificacion;
 
-    public Audiolibro(String titulo, String identificador, EstadoRecurso estado, String narrador, double duracion) {
+    public Audiolibro(String titulo, String identificador, enums.EstadoRecurso estado, String narrador, double duracion) {
         super(titulo, identificador, estado);
         this.narrador = narrador;
         this.duracion = duracion;
