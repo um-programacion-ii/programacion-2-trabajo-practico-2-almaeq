@@ -139,16 +139,13 @@ public class CLI {
             System.out.println("⚠️ No hay usuarios registrados. Cree uno primero.\n");
             return;
         }
-
         // Verificar que haya recursos
         if (GestorRecursos.estaVacio()) {
             System.out.println("⚠️ No hay recursos digitales cargados.\n");
             return;
         }
-
         // Mostrar recursos disponibles
         GestorRecursos.mostrarListado();
-
         // Seleccionar usuario
         System.out.println("Seleccione un usuario por ID para prestar el recurso:");
         GestorUsuario.listar().forEach(u ->
@@ -159,7 +156,6 @@ public class CLI {
             System.out.println("❌ Usuario no encontrado.");
             return;
         }
-
         // Ingresar ID del recurso
         System.out.print("Ingrese el ID del recurso a prestar: ");
         String recursoId = scanner.nextLine();
@@ -208,7 +204,7 @@ public class CLI {
     private static void buscarUsuarioPorNombre() {
         System.out.print("Ingrese el nombre a buscar: ");
         String nombre = scanner.nextLine();
-        List<Usuario> resultados = GestorUsuario.buscarPorNombre(nombre);
+        List<Usuario> resultados = GestorUsuario.buscarPorNombreOrdenado(nombre);
 
         if (resultados.isEmpty()) {
             System.out.println("⚠️ No se encontraron usuarios con ese nombre.");

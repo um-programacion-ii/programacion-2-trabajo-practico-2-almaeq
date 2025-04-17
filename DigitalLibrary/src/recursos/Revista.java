@@ -89,6 +89,11 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
     }
 
     @Override
+    public boolean esRenovable() {
+        return puedeRenovarse(); // ya que Libro implementa Renovable
+    }
+
+    @Override
     public void prestarSiEsPosible() {
         if (!estaPrestado()) {
             prestar();

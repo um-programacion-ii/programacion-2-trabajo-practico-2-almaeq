@@ -49,5 +49,9 @@ public abstract class RecursoDigital implements IRecursoDigital {
     public void configurarNotificaciones(List<ServicioNotificaciones> servicios, String destinatario) {
     }
 
+    public boolean esRenovable() {
+        return false; // Por defecto
+    }
+
     public abstract String mostrar();
 }

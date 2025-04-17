@@ -100,6 +100,11 @@ public class Libro extends RecursoDigital implements Prestable, Renovable, Notif
     }
 
     @Override
+    public boolean esRenovable() {
+        return puedeRenovarse(); // ya que Libro implementa Renovable
+    }
+
+    @Override
     public void prestarSiEsPosible() {
         if (!estaPrestado()) {
             prestar();

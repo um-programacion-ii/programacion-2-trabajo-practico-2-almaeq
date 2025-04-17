@@ -1,6 +1,7 @@
 package gestores;
 
 import recursos.*;
+import utils.Comparadores;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,5 +90,22 @@ public class GestorRecursos {
         };
     }
 
+    public static List<RecursoDigital> listarPorTitulo() {
+        return recursos.stream()
+                .sorted(Comparadores.POR_TITULO)
+                .toList();
+    }
+
+    public static List<RecursoDigital> listarPorEstado() {
+        return recursos.stream()
+                .sorted(Comparadores.POR_ESTADO)
+                .toList();
+    }
+
+    public static List<RecursoDigital> listarPorRenovable() {
+        return recursos.stream()
+                .sorted(Comparadores.POR_RENOVABLE)
+                .toList();
+    }
 
 }

@@ -1,6 +1,7 @@
 package gestores;
 
 import usuario.Usuario;
+import utils.Comparadores;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,14 +34,6 @@ public class GestorUsuario {
 
     public static Usuario buscarPorEmail(String email) {
         return usuarios.get(email);
-    }
-
-    // ✅ Buscar por nombre exacto (ignora mayúsculas)
-    public static List<Usuario> buscarPorNombre(String nombre) {
-        return usuarios.values()
-                .stream()
-                .filter(u -> u.getNombre().equalsIgnoreCase(nombre))
-                .collect(Collectors.toList());
     }
 
     // ✅ Buscar por fragmento en nombre o apellido (ignora mayúsculas)
@@ -76,6 +69,20 @@ public class GestorUsuario {
         Usuario nuevo = new Usuario(nombre, apellido, email, id);
         usuarios.put(email, nuevo);
         return nuevo;
+    }
+
+    public static List<Usuario> listarOrdenadoPorApellido(String apellido) {
+        return usuarios.values().stream()
+                .sorted(Comparadores.POR_APELLIDO)
+                .filter(u -> u.getNombre().equalsIgnoreCase(apellido))
+                .toList();
+    }
+
+    public static List<Usuario> buscarPorNombreOrdenado(String nombre) {
+        return usuarios.values().stream()
+                .filter(u -> u.getNombre().equalsIgnoreCase(nombre))
+                .sorted(Comparadores.POR_NOMBRE) // ordenar por nombre
+                .toList();
     }
 
 
