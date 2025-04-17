@@ -1,9 +1,10 @@
 package gestores;
 
-import recursos.RecursoDigital;
+import recursos.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class GestorRecursos {
@@ -52,4 +53,41 @@ public class GestorRecursos {
                 .filter(tipo::isInstance)
                 .collect(Collectors.toList());
     }
+
+    public static void mostrarListado() {
+        if (estaVacio()) {
+            System.out.println("⚠️ No hay recursos digitales cargados.\n");
+        } else {
+            System.out.println("=== Recursos Disponibles ===");
+            recursos.forEach(System.out::println);
+            System.out.println();
+        }
+    }
+
+    public static RecursoDigital crearRecurso(int tipo, String titulo, String id, EstadoRecurso estado, Scanner scanner) {
+        return switch (tipo) {
+            case 1 -> {
+                System.out.print("Autor: ");
+                String autor = scanner.nextLine();
+                System.out.print("Cantidad de páginas: ");
+                int paginas = Integer.parseInt(scanner.nextLine());
+                yield new Libro(titulo, id, estado, paginas, autor);
+            }
+            case 2 -> {
+                System.out.print("Número de edición: ");
+                int numero = Integer.parseInt(scanner.nextLine());
+                yield new Revista(titulo, id, estado, numero);
+            }
+            case 3 -> {
+                System.out.print("Narrador: ");
+                String narrador = scanner.nextLine();
+                System.out.print("Duración (horas): ");
+                double duracion = Double.parseDouble(scanner.nextLine());
+                yield new Audiolibro(titulo, id, estado, narrador, duracion);
+            }
+            default -> null;
+        };
+    }
+
+
 }

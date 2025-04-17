@@ -122,7 +122,7 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
         String prestamoInfo = prestado
                 ? " (Prestado desde: " + fechaPrestamo + (puedeRenovarse() ? ", renovable" : ", sin renovaciones") + ")"
                 : (fechaDevolucion != null ? " (Devuelto el: " + fechaDevolucion + ")" : "");
-        return "📰 Revista - " + titulo + " | Nº: " + numero + " | Estado: " + estado + " | Estado: " + estado + prestamoInfo;
+        return "📘 ID: " + identificador  + " | Revista - " + titulo + " | Nº: " + numero + " | Estado: " + estado + " | Estado: " + estado + prestamoInfo;
     }
 
     // === MÉTODOS PARA NOTIFICACIONES ===
@@ -155,5 +155,11 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
         }
         setDestinatarioNotificacion(destinatario);
     }
+
+    @Override
+    public String toString() {
+        return mostrar(); // o directamente implementá el texto acá si querés
+    }
+
 
 }

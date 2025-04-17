@@ -133,7 +133,7 @@ public class Libro extends RecursoDigital implements Prestable, Renovable, Notif
         String prestamoInfo = prestado
                 ? " (Prestado desde: " + fechaPrestamo + (puedeRenovarse() ? ", renovable" : ", sin renovaciones") + ")"
                 : (fechaDevolucion != null ? " (Devuelto el: " + fechaDevolucion + ")" : "");
-        return "📘 Libro - " + titulo + " | Autor: " + autor + " | Páginas: " + cant_paginas + " | Estado: " + estado + prestamoInfo;
+        return "📘 ID: " + identificador  + " | Libro - " + titulo + " | Autor: " + autor + " | Páginas: " + cant_paginas + " | Estado: " + estado + prestamoInfo;
     }
 
     // === MÉTODOS PARA NOTIFICACIONES ===
@@ -167,4 +167,10 @@ public class Libro extends RecursoDigital implements Prestable, Renovable, Notif
         }
         setDestinatarioNotificacion(destinatario);
     }
+
+    @Override
+    public String toString() {
+        return mostrar(); // o directamente implementá el texto acá si querés
+    }
+
 }

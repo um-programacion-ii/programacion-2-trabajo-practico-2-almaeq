@@ -52,4 +52,31 @@ public class GestorUsuario {
                         || u.getApellido().toLowerCase().contains(f))
                 .collect(Collectors.toList());
     }
+
+    public static void mostrarListado() {
+        if (estaVacio()) {
+            System.out.println("⚠️ No hay usuarios cargados.\n");
+        } else {
+            System.out.println("=== Lista de Usuarios ===");
+            usuarios.values().forEach(System.out::println);
+            System.out.println();
+        }
+    }
+
+    public static Usuario crearUsuarioDesdeInput(Scanner scanner) {
+        System.out.print("Nombre: ");
+        String nombre = scanner.nextLine();
+        System.out.print("Apellido: ");
+        String apellido = scanner.nextLine();
+        System.out.print("Email: ");
+        String email = scanner.nextLine();
+        System.out.print("ID (número): ");
+        int id = Integer.parseInt(scanner.nextLine());
+
+        Usuario nuevo = new Usuario(nombre, apellido, email, id);
+        usuarios.put(email, nuevo);
+        return nuevo;
+    }
+
+
 }
