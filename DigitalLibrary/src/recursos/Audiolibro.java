@@ -107,7 +107,7 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
         String prestamoInfo = prestado
                 ? " (Prestado desde: " + fechaPrestamo + ")"
                 : (fechaDevolucion != null ? " (Devuelto el: " + fechaDevolucion + ")" : "");
-        return "🎧 Audiolibro - " + titulo + " | Narrador: " + narrador + " | Duración: " + duracion + " hs | Estado: " + estado+ prestamoInfo;
+        return "📘 ID: " + identificador  + " |  Audiolibro - " + titulo + " | Narrador: " + narrador + " | Duración: " + duracion + " hs | Estado: " + estado+ prestamoInfo;
     }
 
     // === MÉTODOS PARA NOTIFICACIONES ===
@@ -140,4 +140,10 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
         }
         setDestinatarioNotificacion(destinatario);
     }
+
+    @Override
+    public String toString() {
+        return mostrar(); // o directamente implementá el texto acá si querés
+    }
+
 }
