@@ -60,11 +60,14 @@ public class CLI {
         int opcion;
         do {
             System.out.println("""
-                    === BUSCAR USUARIO ===
-                    1. Listar Usuarios
-                    2. Buscar por Nombre
-                    3. Volver al Menú Principal
-                    """);
+                === BUSCAR USUARIO ===
+                1. Listar todos
+                2. Buscar por nombre exacto
+                3. Buscar por fragmento en nombre o apellido
+                4. Listar ordenados por apellido
+                5. Listar ordenados por nombre y apellido
+                6. Volver al Menú Principal
+                """);
             try {
                 opcion = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
@@ -74,38 +77,50 @@ public class CLI {
             switch (opcion) {
                 case 1 -> GestorUsuario.mostrarListado();
                 case 2 -> buscarUsuarioPorNombre();
-                case 3 -> System.out.println("↩️ Volviendo...\n");
+                case 3 -> buscarUsuarioPorFragmento();
+                case 4 -> listarUsuariosPorApellido();
+                case 5 -> listarUsuariosPorNombre();
+                case 6 -> System.out.println("↩️ Volviendo...\n");
                 default -> System.out.println("❌ Opción inválida.\n");
             }
-        } while (opcion != 3);
+        } while (opcion != 6);
     }
+
 
     private static void submenuBuscarRecurso() {
         int opcion;
         do {
             System.out.println("""
-                    === BUSCAR RECURSO ===
-                    1. Listar Recursos
-                    2. Buscar por Título Exacto
-                    3. Buscar por Palabra en el Título
-                    4. Buscar por Tipo
-                    5. Volver al Menú Principal
-                    """);
+                === BUSCAR RECURSO ===
+                1. Listar Todos
+                2. Buscar por Título Exacto
+                3. Buscar por Palabra en el Título
+                4. Buscar por Tipo
+                5. Listar ordenados por Título
+                6. Listar ordenados por Estado
+                7. Listar recursos renovables primero
+                8. Volver al Menú Principal
+                """);
             try {
                 opcion = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
                 opcion = -1;
             }
+
             switch (opcion) {
                 case 1 -> GestorRecursos.mostrarListado();
                 case 2 -> buscarRecursoPorTituloExacto();
                 case 3 -> buscarRecursosPorPalabraEnTitulo();
                 case 4 -> buscarRecursosPorTipo();
-                case 5 -> System.out.println("↩️ Volviendo...\n");
+                case 5 -> listarOrdenadoPorTitulo();
+                case 6 -> listarOrdenadoPorEstado();
+                case 7 -> listarOrdenadoPorRenovable();
+                case 8 -> System.out.println("↩️ Volviendo...\n");
                 default -> System.out.println("❌ Opción inválida.\n");
             }
-        } while (opcion != 5);
+        } while (opcion != 8);
     }
+
 
     private static void crearUsuario() {
         Usuario nuevo = GestorUsuario.crearUsuarioDesdeInput(scanner);
@@ -274,4 +289,61 @@ public class CLI {
             System.out.println();
         }
     }
+
+    private static void listarOrdenadoPorTitulo() {
+        List<RecursoDigital> ordenados = GestorRecursos.listarPorTitulo();
+        System.out.println("=== Recursos ordenados por Título ===");
+        ordenados.forEach(r -> System.out.println(r.mostrar()));
+        System.out.println();
+    }
+
+    private static void listarOrdenadoPorEstado() {
+        List<RecursoDigital> ordenados = GestorRecursos.listarPorEstado();
+        System.out.println("=== Recursos ordenados por Estado (DISPONIBLE primero) ===");
+        ordenados.forEach(r -> System.out.println(r.mostrar()));
+        System.out.println();
+    }
+
+    private static void listarOrdenadoPorRenovable() {
+        List<RecursoDigital> ordenados = GestorRecursos.listarPorRenovable();
+        System.out.println("=== Recursos ordenados por posibilidad de Renovación ===");
+        ordenados.forEach(r -> System.out.println(r.mostrar()));
+        System.out.println();
+    }
+
+    private static void buscarUsuarioPorFragmento() {
+        System.out.print("Ingrese fragmento del nombre o apellido: ");
+        String frag = scanner.nextLine();
+        List<Usuario> resultados = GestorUsuario.buscarPorFragmentoNombre(frag);
+
+        if (resultados.isEmpty()) {
+            System.out.println("⚠️ No se encontraron usuarios.");
+        } else {
+            System.out.println("=== Usuarios Encontrados ===");
+            resultados.forEach(System.out::println);
+        }
+        System.out.println();
+    }
+
+    private static void listarUsuariosPorApellido() {
+        List<Usuario> ordenados = GestorUsuario.listar().stream()
+                .sorted(utils.Comparadores.POR_APELLIDO)
+                .toList();
+
+        System.out.println("=== Usuarios ordenados por Apellido ===");
+        ordenados.forEach(System.out::println);
+        System.out.println();
+    }
+
+    private static void listarUsuariosPorNombre() {
+        List<Usuario> ordenados = GestorUsuario.listar().stream()
+                .sorted(utils.Comparadores.POR_NOMBRE)
+                .toList();
+
+        System.out.println("=== Usuarios ordenados por Nombre y Apellido ===");
+        ordenados.forEach(System.out::println);
+        System.out.println();
+    }
+
+
 }
