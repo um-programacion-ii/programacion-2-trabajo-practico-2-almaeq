@@ -28,7 +28,6 @@ public class CLI {
             } catch (NumberFormatException e) {
                 opcion = -1;
             }
-
             switch (opcion) {
                 case 1 -> crearUsuario();
                 case 2 -> submenuBuscarUsuario();
@@ -40,7 +39,6 @@ public class CLI {
                 case 8 -> System.out.println("Saliendo...");
                 default -> System.out.println("❌ Opción inválida.\n");
             }
-
         } while (opcion != 8);
     }
 
@@ -68,7 +66,7 @@ public class CLI {
                 2. Buscar por nombre exacto
                 3. Buscar por fragmento en nombre o apellido
                 4. Listar ordenados por apellido
-                5. Listar ordenados por nombre y apellido
+                5. Listar ordenados por nombre
                 6. Volver al Menú Principal
                 """);
             try {
@@ -76,7 +74,6 @@ public class CLI {
             } catch (NumberFormatException e) {
                 opcion = -1;
             }
-
             switch (opcion) {
                 case 1 -> GestorUsuario.mostrarListado();
                 case 2 -> buscarUsuarioPorNombre();
@@ -88,7 +85,6 @@ public class CLI {
             }
         } while (opcion != 6);
     }
-
 
     private static void submenuBuscarRecurso() {
         int opcion;
@@ -133,9 +129,7 @@ public class CLI {
     private static void crearRecursoDigital() {
         System.out.println("Seleccione una categoría de recurso:");
         CategoriaRecurso[] categorias = CategoriaRecurso.values();
-        for (int i = 0; i < categorias.length; i++) {
-            System.out.println((i + 1) + ". " + categorias[i]);
-        }
+        mostrarCategoriasDisponibles();
         int tipo = Integer.parseInt(scanner.nextLine()) - 1;
         if (tipo < 0 || tipo >= categorias.length) {
             System.out.println("❌ Tipo inválido.\n");
@@ -322,10 +316,8 @@ public class CLI {
 
     private static void buscarPorCategoria() {
         System.out.println("Seleccione una categoría:");
+        mostrarCategoriasDisponibles();
         CategoriaRecurso[] categorias = CategoriaRecurso.values();
-        for (int i = 0; i < categorias.length; i++) {
-            System.out.println((i + 1) + ". " + categorias[i]);
-        }
         int opcion = Integer.parseInt(scanner.nextLine()) - 1;
         if (opcion < 0 || opcion >= categorias.length) {
             System.out.println("❌ Categoría inválida.\n");
@@ -341,5 +333,14 @@ public class CLI {
         }
         System.out.println();
     }
+
+    private static void mostrarCategoriasDisponibles() {
+        System.out.println("📚 Categorías disponibles:");
+        CategoriaRecurso[] categorias = CategoriaRecurso.values();
+        for (int i = 0; i < categorias.length; i++) {
+            System.out.println((i + 1) + ". " + categorias[i]);
+        }
+    }
+
 
 }
