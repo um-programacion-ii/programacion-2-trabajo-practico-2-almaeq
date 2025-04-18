@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+
 public class CLI {
 
     private static final Scanner scanner = new Scanner(System.in);
@@ -93,16 +94,17 @@ public class CLI {
         int opcion;
         do {
             System.out.println("""
-                === BUSCAR RECURSO ===
-                1. Listar Todos
-                2. Buscar por Título Exacto
-                3. Buscar por Palabra en el Título
-                4. Buscar por Tipo
-                5. Listar ordenados por Título
-                6. Listar ordenados por Estado
-                7. Listar recursos renovables primero
-                8. Volver al Menú Principal
-                """);
+            === BUSCAR RECURSO ===
+            1. Listar Recursos
+            2. Buscar por Título Exacto
+            3. Buscar por Palabra en el Título
+            4. Buscar por Categoría
+            5. Listar ordenados por Título
+            6. Listar ordenados por Estado
+            7. Listar recursos renovables primero
+            8. Volver al Menú Principal
+            """);
+
             try {
                 opcion = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
@@ -113,16 +115,15 @@ public class CLI {
                 case 1 -> GestorRecursos.mostrarListado();
                 case 2 -> buscarRecursoPorTituloExacto();
                 case 3 -> buscarRecursosPorPalabraEnTitulo();
-                case 4 -> buscarRecursosPorTipo();
+                case 4 -> buscarPorCategoria();
                 case 5 -> listarOrdenadoPorTitulo();
                 case 6 -> listarOrdenadoPorEstado();
                 case 7 -> listarOrdenadoPorRenovable();
                 case 8 -> System.out.println("↩️ Volviendo...\n");
-                default -> System.out.println("❌ Opción inválida.\n");
+
             }
         } while (opcion != 8);
     }
-
 
     private static void crearUsuario() {
         Usuario nuevo = GestorUsuario.crearUsuarioDesdeInput(scanner);
@@ -130,23 +131,29 @@ public class CLI {
     }
 
     private static void crearRecursoDigital() {
-        System.out.println("""
-                Tipo de recurso:
-                1. Libro
-                2. Revista
-                3. Audiolibro
-                """);
-        int tipo = Integer.parseInt(scanner.nextLine());
-
+        System.out.println("Seleccione una categoría de recurso:");
+        CategoriaRecurso[] categorias = CategoriaRecurso.values();
+        for (int i = 0; i < categorias.length; i++) {
+            System.out.println((i + 1) + ". " + categorias[i]);
+        }
+        int tipo = Integer.parseInt(scanner.nextLine()) - 1;
+        if (tipo < 0 || tipo >= categorias.length) {
+            System.out.println("❌ Tipo inválido.\n");
+            return;
+        }
+        CategoriaRecurso categoria = categorias[tipo];
         System.out.print("Título: ");
         String titulo = scanner.nextLine();
         System.out.print("Id: ");
         String id = scanner.nextLine();
 
-        CategoriaRecurso categoria = CategoriaRecurso.valueOf(categoriaStr);
         EstadoRecurso estado = EstadoRecurso.DISPONIBLE;
-        RecursoDigital recurso = GestorRecursos.crearRecurso(categoria, titulo, id, estado, scanner);
 
+        RecursoDigital recurso = GestorRecursos.crearRecurso(categoria, titulo, id, estado, scanner);
+        if (recurso == null) {
+            System.out.println("❌ No se pudo crear el recurso.\n");
+            return;
+        }
         GestorRecursos.agregar(recurso);
         System.out.println("✅ Recurso agregado con éxito.\n");
     }
@@ -182,7 +189,6 @@ public class CLI {
             System.out.println("❌ Recurso no encontrado.");
             return;
         }
-
         // Configurar notificaciones
         ServicioNotificacionesEmail email = new ServicioNotificacionesEmail();
         ServicioNotificacionesSMS sms = new ServicioNotificacionesSMS();
@@ -261,38 +267,6 @@ public class CLI {
         System.out.println();
     }
 
-    private static void buscarRecursosPorTipo() {
-        System.out.println("""
-                Tipo de recurso a buscar:
-                1. Libro
-                2. Revista
-                3. Audiolibro
-                """);
-        int opcion = Integer.parseInt(scanner.nextLine());
-
-        Class<?> tipo = switch (opcion) {
-            case 1 -> Libro.class;
-            case 2 -> Revista.class;
-            case 3 -> Audiolibro.class;
-            default -> null;
-        };
-
-        if (tipo == null) {
-            System.out.println("❌ Tipo inválido.\n");
-            return;
-        }
-
-        List<RecursoDigital> resultados = GestorRecursos.buscarPorTipo(tipo);
-
-        if (resultados.isEmpty()) {
-            System.out.println("⚠️ No se encontraron recursos de ese tipo.\n");
-        } else {
-            System.out.println("=== Recursos Encontrados ===");
-            resultados.forEach(r -> System.out.println(r.mostrar()));
-            System.out.println();
-        }
-    }
-
     private static void listarOrdenadoPorTitulo() {
         List<RecursoDigital> ordenados = GestorRecursos.listarPorTitulo();
         System.out.println("=== Recursos ordenados por Título ===");
@@ -332,7 +306,6 @@ public class CLI {
         List<Usuario> ordenados = GestorUsuario.listar().stream()
                 .sorted(utils.Comparadores.POR_APELLIDO)
                 .toList();
-
         System.out.println("=== Usuarios ordenados por Apellido ===");
         ordenados.forEach(System.out::println);
         System.out.println();
@@ -342,11 +315,31 @@ public class CLI {
         List<Usuario> ordenados = GestorUsuario.listar().stream()
                 .sorted(utils.Comparadores.POR_NOMBRE)
                 .toList();
-
         System.out.println("=== Usuarios ordenados por Nombre y Apellido ===");
         ordenados.forEach(System.out::println);
         System.out.println();
     }
 
+    private static void buscarPorCategoria() {
+        System.out.println("Seleccione una categoría:");
+        CategoriaRecurso[] categorias = CategoriaRecurso.values();
+        for (int i = 0; i < categorias.length; i++) {
+            System.out.println((i + 1) + ". " + categorias[i]);
+        }
+        int opcion = Integer.parseInt(scanner.nextLine()) - 1;
+        if (opcion < 0 || opcion >= categorias.length) {
+            System.out.println("❌ Categoría inválida.\n");
+            return;
+        }
+        CategoriaRecurso categoriaSeleccionada = categorias[opcion];
+        List<RecursoDigital> resultados = GestorRecursos.buscarPorCategoria(categoriaSeleccionada);
+        if (resultados.isEmpty()) {
+            System.out.println("⚠️ No se encontraron recursos de la categoría seleccionada.");
+        } else {
+            System.out.println("=== Recursos en la categoría " + categoriaSeleccionada + " ===");
+            resultados.forEach(r -> System.out.println(r.mostrar()));
+        }
+        System.out.println();
+    }
 
 }

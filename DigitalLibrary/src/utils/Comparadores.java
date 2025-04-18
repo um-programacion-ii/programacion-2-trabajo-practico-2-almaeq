@@ -1,6 +1,6 @@
 package utils;
 
-import recursos.EstadoRecurso;
+import enums.EstadoRecurso;
 import recursos.RecursoDigital;
 import usuario.Usuario;
 
