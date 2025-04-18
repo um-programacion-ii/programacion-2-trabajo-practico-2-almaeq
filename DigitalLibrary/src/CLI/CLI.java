@@ -297,11 +297,15 @@ public class CLI {
     }
 
     private static void listarUsuariosPorApellido() {
-        List<Usuario> ordenados = GestorUsuario.listar().stream()
-                .sorted(utils.Comparadores.POR_APELLIDO)
-                .toList();
-        System.out.println("=== Usuarios ordenados por Apellido ===");
-        ordenados.forEach(System.out::println);
+        System.out.print("Ingrese el apellido a buscar: ");
+        String apellido = scanner.nextLine();
+        List<Usuario> usuarios = GestorUsuario.listarOrdenadoPorApellido(apellido);
+        if (usuarios.isEmpty()) {
+            System.out.println("⚠️ No se encontraron usuarios con ese apellido.");
+        } else {
+            System.out.println("=== Usuarios con apellido '" + apellido + "' ===");
+            usuarios.forEach(System.out::println);
+        }
         System.out.println();
     }
 
@@ -341,6 +345,5 @@ public class CLI {
             System.out.println((i + 1) + ". " + categorias[i]);
         }
     }
-
 
 }

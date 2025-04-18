@@ -2,6 +2,7 @@ package gestores;
 
 import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
+import excepciones.RecursoNoDisponibleExcepcion;
 import recursos.*;
 import utils.Comparadores;
 
@@ -33,27 +34,35 @@ public class GestorRecursos {
                 .orElse(null);
     }
 
-    public static RecursoDigital buscarPorTitulo(String titulo) {
+    public static RecursoDigital buscarPorTitulo(String titulo) throws RecursoNoDisponibleExcepcion {
         return recursos.stream()
                 .filter(r -> r.getTitulo().equalsIgnoreCase(titulo))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new RecursoNoDisponibleExcepcion("No se encontró el recurso con título: " + titulo));
     }
 
-    public static List<RecursoDigital> buscarPorFragmentoTitulo(String fragmento) {
+    public static List<RecursoDigital> buscarPorFragmentoTitulo(String fragmento) throws RecursoNoDisponibleExcepcion {
         String f = fragmento.toLowerCase();
-        return recursos.stream()
+        List<RecursoDigital> resultado = recursos.stream()
                 .filter(r -> r.getTitulo().toLowerCase().contains(f))
-                .collect(Collectors.toList());
+                .toList();
+        if (resultado.isEmpty()) {
+            throw new RecursoNoDisponibleExcepcion("No se encontraron recursos con la palabra: " + fragmento);
+        }
+        return resultado;
     }
 
-    public static List<RecursoDigital> buscarPorTipo(Class<?> tipo) {
-        return recursos.stream()
+    public static List<RecursoDigital> buscarPorTipo(Class<?> tipo) throws RecursoNoDisponibleExcepcion {
+        List<RecursoDigital> resultado = recursos.stream()
                 .filter(tipo::isInstance)
-                .collect(Collectors.toList());
+                .toList();
+        if (resultado.isEmpty()) {
+            throw new RecursoNoDisponibleExcepcion("No se encontraron recursos del tipo: " + tipo.getSimpleName());
+        }
+        return resultado;
     }
 
-    public static List<RecursoDigital> buscarPorCategoria(CategoriaRecurso categoria) {
+    public static List<RecursoDigital> buscarPorCategoria(CategoriaRecurso categoria) throws RecursoNoDisponibleExcepcion{
         return switch (categoria) {
             case LIBRO -> buscarPorTipo(Libro.class);
             case REVISTA -> buscarPorTipo(Revista.class);
