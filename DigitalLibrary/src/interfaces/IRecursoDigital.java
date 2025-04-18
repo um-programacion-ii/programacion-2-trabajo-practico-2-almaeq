@@ -1,6 +1,5 @@
 package interfaces;
-
-import recursos.EstadoRecurso;
+import enums.EstadoRecurso;
 
 public interface IRecursoDigital {
     String getTitulo();

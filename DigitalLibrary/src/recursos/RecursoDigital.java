@@ -1,5 +1,6 @@
 package recursos;
 
+import enums.EstadoRecurso;
 import interfaces.IRecursoDigital;
 import servicios.ServicioNotificaciones;
 
@@ -27,12 +28,12 @@ public abstract class RecursoDigital implements IRecursoDigital {
     }
 
     @Override
-    public EstadoRecurso getEstado() {
+    public enums.EstadoRecurso getEstado() {
         return estado;
     }
 
     @Override
-    public void actualizarEstado(EstadoRecurso estado) {
+    public void actualizarEstado(enums.EstadoRecurso estado) {
         this.estado = estado;
     }
 

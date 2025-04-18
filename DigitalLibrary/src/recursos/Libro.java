@@ -1,5 +1,6 @@
 package recursos;
 
+import enums.EstadoRecurso;
 import interfaces.Notificable;
 import interfaces.Prestable;
 import interfaces.Renovable;
@@ -21,7 +22,7 @@ public class Libro extends RecursoDigital implements Prestable, Renovable, Notif
     private String destinatarioNotificacion;
 
 
-    public Libro(String titulo, String identificador, EstadoRecurso estado, int cant_paginas, String autor) {
+    public Libro(String titulo, String identificador, enums.EstadoRecurso estado, int cant_paginas, String autor) {
         super(titulo, identificador, estado);
         this.cant_paginas = cant_paginas;
         this.autor = autor;
