@@ -1,5 +1,6 @@
 package gestores;
 
+import excepciones.UsuarioNoEncontradoExcepcion;
 import usuario.Usuario;
 import utils.Comparadores;
 
@@ -24,26 +25,25 @@ public class GestorUsuario {
         return usuarios.isEmpty();
     }
 
-    public static Usuario buscarPorId(int id) {
+    public static Usuario buscarPorId(int id) throws UsuarioNoEncontradoExcepcion {
         return usuarios.values()
                 .stream()
                 .filter(u -> u.getID() == id)
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new UsuarioNoEncontradoExcepcion("Usuario con ID " + id + " no encontrado."));
     }
 
-    public static Usuario buscarPorEmail(String email) {
-        return usuarios.get(email);
-    }
-
-    // ✅ Buscar por fragmento en nombre o apellido (ignora mayúsculas)
-    public static List<Usuario> buscarPorFragmentoNombre(String fragmento) {
+    public static List<Usuario> buscarPorFragmento(String fragmento) throws UsuarioNoEncontradoExcepcion {
         String f = fragmento.toLowerCase();
-        return usuarios.values()
+        List<Usuario> resultado = usuarios.values()
                 .stream()
                 .filter(u -> u.getNombre().toLowerCase().contains(f)
                         || u.getApellido().toLowerCase().contains(f))
-                .collect(Collectors.toList());
+                .toList();
+        if (resultado.isEmpty()) {
+            throw new UsuarioNoEncontradoExcepcion("No se encontraron usuarios que coincidan con: " + fragmento);
+        }
+        return resultado;
     }
 
     public static void mostrarListado() {
@@ -74,15 +74,20 @@ public class GestorUsuario {
     public static List<Usuario> listarOrdenadoPorApellido(String apellido) {
         return usuarios.values().stream()
                 .sorted(Comparadores.POR_APELLIDO)
-                .filter(u -> u.getNombre().equalsIgnoreCase(apellido))
+                .filter(u -> u.getApellido().equalsIgnoreCase(apellido))
                 .toList();
     }
 
-    public static List<Usuario> buscarPorNombreOrdenado(String nombre) {
-        return usuarios.values().stream()
+    public static List<Usuario> buscarPorNombreOrdenado(String nombre) throws UsuarioNoEncontradoExcepcion {
+        List<Usuario> resultado = usuarios.values().stream()
                 .filter(u -> u.getNombre().equalsIgnoreCase(nombre))
-                .sorted(Comparadores.POR_NOMBRE) // ordenar por nombre
+                .sorted(Comparadores.POR_NOMBRE)
                 .toList();
+
+        if (resultado.isEmpty()) {
+            throw new UsuarioNoEncontradoExcepcion("No se encontraron usuarios con nombre: " + nombre);
+        }
+        return resultado;
     }
 
 
