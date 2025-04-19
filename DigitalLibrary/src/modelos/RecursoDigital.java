@@ -1,4 +1,4 @@
-package recursos;
+package modelos;
 
 import enums.EstadoRecurso;
 import interfaces.IRecursoDigital;

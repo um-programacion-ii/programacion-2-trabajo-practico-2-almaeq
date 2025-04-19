@@ -2,7 +2,7 @@ package CLI;
 
 import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
-import recursos.*;
+import modelos.*;
 import gestores.GestorUsuario;
 import gestores.GestorRecursos;
 import servicios.ServicioNotificaciones;
@@ -155,12 +155,12 @@ public class CLI {
             System.out.println("⚠️ No hay usuarios registrados. Cree uno primero.\n");
             return;
         }
-        // Verificar que haya recursos
+        // Verificar que haya modelos
         if (GestorRecursos.estaVacio()) {
             System.out.println("⚠️ No hay recursos digitales cargados.\n");
             return;
         }
-        // Mostrar recursos disponibles
+        // Mostrar modelos disponibles
         GestorRecursos.mostrarListado();
         try {
             // Seleccionar usuario

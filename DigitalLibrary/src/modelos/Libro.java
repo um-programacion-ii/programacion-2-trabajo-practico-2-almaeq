@@ -1,46 +1,48 @@
-package recursos;
-
+package modelos;
 
 import enums.EstadoRecurso;
 import interfaces.Notificable;
 import interfaces.Prestable;
+import interfaces.Renovable;
 import servicios.ServicioNotificaciones;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Audiolibro extends RecursoDigital implements Prestable, Notificable {
-    private String narrador;
-    private double duracion;
+public class Libro extends RecursoDigital implements Prestable, Renovable, Notificable {
+    private int cant_paginas;
+    private String autor;
     private boolean prestado = false;
     private LocalDate fechaPrestamo;
     private LocalDate fechaDevolucion;
+    private int renovacionesDisponibles = 1;
 
     private final List<ServicioNotificaciones> serviciosNotificaciones = new ArrayList<>();
     private String destinatarioNotificacion;
 
-    public Audiolibro(String titulo, String identificador, enums.EstadoRecurso estado, String narrador, double duracion) {
+
+    public Libro(String titulo, String identificador, enums.EstadoRecurso estado, int cant_paginas, String autor) {
         super(titulo, identificador, estado);
-        this.narrador = narrador;
-        this.duracion = duracion;
+        this.cant_paginas = cant_paginas;
+        this.autor = autor;
     }
 
     // === GETTERS Y SETTERS ===
-    public String getNarrador() {
-        return narrador;
+    public int getCant_paginas() {
+        return cant_paginas;
     }
 
-    public void setNarrador(String narrador) {
-        this.narrador = narrador;
+    public void setCant_paginas(int cant_paginas) {
+        this.cant_paginas = cant_paginas;
     }
 
-    public double getDuracion() {
-        return duracion;
+    public String getAutor() {
+        return autor;
     }
 
-    public void setDuracion(double duracion) {
-        this.duracion = duracion;
+    public void setAutor(String autor) {
+        this.autor = autor;
     }
 
     // === MÉTODOS DE INTERFACES ===
@@ -56,7 +58,8 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
             estado = EstadoRecurso.PRESTADO;
             fechaPrestamo = LocalDate.now();
             fechaDevolucion = null;
-            notificar("📘 Se prestó el audiolibro: " + getTitulo());
+            renovacionesDisponibles = 1; // resetear
+            notificar("📘 Se prestó el libro: " + getTitulo());
         }
     }
 
@@ -66,7 +69,7 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
             prestado = false;
             estado = EstadoRecurso.DISPONIBLE;
             fechaDevolucion = LocalDate.now();
-            notificar("📘 Se devolvió el audiolibro: " + getTitulo());
+            notificar("📘 Se devolvió el libro: " + getTitulo());
         }
     }
 
@@ -81,6 +84,28 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
     }
 
     @Override
+    public boolean puedeRenovarse() {
+        return prestado && renovacionesDisponibles > 0;
+    }
+
+    @Override
+    public void renovar() {
+        if (puedeRenovarse()) {
+            fechaPrestamo = LocalDate.now();
+            renovacionesDisponibles--;
+            notificar("🔁 Se renovó el libro: " + getTitulo());
+            System.out.println("🔁 Libro renovado con éxito.");
+        } else {
+            System.out.println("⚠️ No sea puede renovar el libro.");
+        }
+    }
+
+    @Override
+    public boolean esRenovable() {
+        return puedeRenovarse(); // ya que Libro implementa Renovable
+    }
+
+    @Override
     public void prestarSiEsPosible() {
         if (!estaPrestado()) {
             prestar();
@@ -89,9 +114,6 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
             System.out.println("⚠️ El recurso ya está prestado.");
         }
     }
-
-    @Override
-    public void renovarSiEsPosible() {}
 
     @Override
     public void devolverSiEsPosible() {
@@ -104,11 +126,20 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
     }
 
     @Override
+    public void renovarSiEsPosible() {
+        if (puedeRenovarse()) {
+            renovar();
+        } else {
+            System.out.println("⚠️ El recurso no puede renovarse en este momento.");
+        }
+    }
+
+    @Override
     public String mostrar() {
         String prestamoInfo = prestado
-                ? " (Prestado desde: " + fechaPrestamo + ")"
+                ? " (Prestado desde: " + fechaPrestamo + (puedeRenovarse() ? ", renovable" : ", sin renovaciones") + ")"
                 : (fechaDevolucion != null ? " (Devuelto el: " + fechaDevolucion + ")" : "");
-        return "📘 ID: " + identificador  + " |  Audiolibro - " + titulo + " | Narrador: " + narrador + " | Duración: " + duracion + " hs | Estado: " + estado+ prestamoInfo;
+        return "📘 ID: " + identificador  + " | Libro - " + titulo + " | Autor: " + autor + " | Páginas: " + cant_paginas + " | Estado: " + estado + prestamoInfo;
     }
 
     // === MÉTODOS PARA NOTIFICACIONES ===
@@ -121,6 +152,7 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
     }
 
     private void notificar(String mensaje) {
+
         for (ServicioNotificaciones servicio : serviciosNotificaciones) {
             if (destinatarioNotificacion != null && servicio.estaActivo(destinatarioNotificacion)) {
                 servicio.enviarNotificacion(destinatarioNotificacion, mensaje);
