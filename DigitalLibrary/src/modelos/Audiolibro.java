@@ -144,7 +144,7 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
 
     @Override
     public String toString() {
-        return mostrar(); // o directamente implementá el texto acá si querés
+        return mostrar();
     }
 
 }

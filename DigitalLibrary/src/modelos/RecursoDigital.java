@@ -54,5 +54,9 @@ public abstract class RecursoDigital implements IRecursoDigital {
         return false; // Por defecto
     }
 
+    public boolean esPrestable() {
+        return estado == EstadoRecurso.DISPONIBLE;
+    }
+
     public abstract String mostrar();
 }

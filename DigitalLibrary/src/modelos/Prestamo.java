@@ -12,14 +12,18 @@ public class Prestamo {
     private LocalDate fechaPrestamo;
     private LocalDate fechaDevolucion;
     private EstadosPrestamo estado;
+    private int renovaciones = 0;
 
-    public Prestamo(int id, RecursoDigital recurso, Usuario usuario, LocalDate fechaPrestamo, LocalDate fechaDevolucion, EstadosPrestamo estado) {
+    private static final int MAX_RENOVACIONES = 1;
+
+    public Prestamo(int id, RecursoDigital recurso, Usuario usuario, LocalDate fechaPrestamo, LocalDate fechaDevolucion, EstadosPrestamo estado, int renovaciones) {
         this.id = id;
         this.recurso = recurso;
         this.usuario = usuario;
         this.fechaPrestamo = fechaPrestamo;
         this.fechaDevolucion = fechaDevolucion;
         this.estado = estado;
+        this.renovaciones = renovaciones;
     }
 
     public int getId() {
@@ -64,8 +68,35 @@ public class Prestamo {
         this.estado = estado;
     }
 
+    public int getRenovaciones() {
+        return renovaciones;
+    }
+
     public boolean estaVencido() {
         return fechaDevolucion != null && fechaDevolucion.isBefore(LocalDate.now());
+    }
+
+    public boolean estaActivo() {
+        return estado == EstadosPrestamo.PRESTADO || estado == EstadosPrestamo.RENOVADO;
+    }
+
+    public boolean estaDisponible() {
+        return estado == EstadosPrestamo.DISPONIBLE;
+    }
+
+    public boolean puedeRenovarse() {
+        return estaActivo() && renovaciones < MAX_RENOVACIONES;
+    }
+
+    public void devolver() {
+        this.estado = EstadosPrestamo.DISPONIBLE;
+        this.fechaDevolucion = LocalDate.now();
+    }
+
+    public void renovar() {
+        this.fechaPrestamo = LocalDate.now();
+        this.estado = EstadosPrestamo.RENOVADO;
+        this.renovaciones++;
     }
 
     @Override
@@ -75,7 +106,7 @@ public class Prestamo {
                 " | Usuario: " + usuario.getNombre() + " " + usuario.getApellido() +
                 " | Fecha préstamo: " + fechaPrestamo +
                 (fechaDevolucion != null ? " | Devolución: " + fechaDevolucion : "") +
-                " | Estado: " + estado;
+                " | Estado: " + estado +
+                " | Renovaciones: " + renovaciones;
     }
-
 }
