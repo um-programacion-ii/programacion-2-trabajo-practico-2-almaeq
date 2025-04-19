@@ -100,13 +100,11 @@ public class CLI {
             7. Listar recursos renovables primero
             8. Volver al Menú Principal
             """);
-
             try {
                 opcion = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
                 opcion = -1;
             }
-
             switch (opcion) {
                 case 1 -> GestorRecursos.mostrarListado();
                 case 2 -> buscarRecursoPorTituloExacto();
@@ -116,7 +114,6 @@ public class CLI {
                 case 6 -> listarOrdenadoPorEstado();
                 case 7 -> listarOrdenadoPorRenovable();
                 case 8 -> System.out.println("↩️ Volviendo...\n");
-
             }
         } while (opcion != 8);
     }
@@ -165,36 +162,40 @@ public class CLI {
         }
         // Mostrar recursos disponibles
         GestorRecursos.mostrarListado();
-        // Seleccionar usuario
-        System.out.println("Seleccione un usuario por ID para prestar el recurso:");
-        GestorUsuario.listar().forEach(u ->
-                System.out.println("- ID: " + u.getID() + " | " + u.getNombre() + " " + u.getApellido()));
-        int userId = Integer.parseInt(scanner.nextLine());
-        Usuario usuario = GestorUsuario.buscarPorId(userId);
-        if (usuario == null) {
-            System.out.println("❌ Usuario no encontrado.");
-            return;
-        }
-        // Ingresar ID del recurso
-        System.out.print("Ingrese el ID del recurso a prestar: ");
-        String recursoId = scanner.nextLine();
-        RecursoDigital recurso = GestorRecursos.buscarPorId(recursoId);
-        if (recurso == null) {
-            System.out.println("❌ Recurso no encontrado.");
-            return;
-        }
-        // Configurar notificaciones
-        ServicioNotificacionesEmail email = new ServicioNotificacionesEmail();
-        ServicioNotificacionesSMS sms = new ServicioNotificacionesSMS();
-        email.activarNotificaciones(usuario.getEmail());
-        sms.activarNotificaciones(usuario.getEmail());
+        try {
+            // Seleccionar usuario
+            System.out.println("Seleccione un usuario por ID para prestar el recurso:");
+            GestorUsuario.listar().forEach(u ->
+                    System.out.println("- ID: " + u.getID() + " | " + u.getNombre() + " " + u.getApellido()));
+            int userId = Integer.parseInt(scanner.nextLine());
+            Usuario usuario = GestorUsuario.buscarPorId(userId);
+            if (usuario == null) {
+                throw new excepciones.UsuarioNoEncontradoExcepcion("Usuario con ID " + userId + " no encontrado.");
+            }
+            // Ingresar ID del recurso
+            System.out.print("Ingrese el ID del recurso a prestar: ");
+            String recursoId = scanner.nextLine();
+            RecursoDigital recurso = GestorRecursos.buscarPorId(recursoId);
+            if (recurso == null) {
+                throw new excepciones.RecursoNoDisponibleExcepcion("Recurso con ID " + recursoId + " no encontrado.");
+            }
+            // Configurar notificaciones
+            ServicioNotificacionesEmail email = new ServicioNotificacionesEmail();
+            ServicioNotificacionesSMS sms = new ServicioNotificacionesSMS();
+            email.activarNotificaciones(usuario.getEmail());
+            sms.activarNotificaciones(usuario.getEmail());
+            List<ServicioNotificaciones> servicios = new ArrayList<>();
+            servicios.add(email);
+            servicios.add(sms);
+            recurso.configurarNotificaciones(servicios, usuario.getEmail());
 
-        List<ServicioNotificaciones> servicios = new ArrayList<>();
-        servicios.add(email);
-        servicios.add(sms);
-        recurso.configurarNotificaciones(servicios, usuario.getEmail());
+            recurso.prestarSiEsPosible();
 
-        recurso.prestarSiEsPosible();
+        } catch (excepciones.UsuarioNoEncontradoExcepcion | excepciones.RecursoNoDisponibleExcepcion e) {
+            System.out.println("❌ " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Entrada inválida. Debe ingresar un número de ID válido.");
+        }
     }
 
     private static void devolverRecurso() {
@@ -222,43 +223,40 @@ public class CLI {
     private static void buscarUsuarioPorNombre() {
         System.out.print("Ingrese el nombre a buscar: ");
         String nombre = scanner.nextLine();
-        List<Usuario> resultados = GestorUsuario.buscarPorNombreOrdenado(nombre);
-
-        if (resultados.isEmpty()) {
-            System.out.println("⚠️ No se encontraron usuarios con ese nombre.");
-        } else {
+        try {
+            List<Usuario> resultados = GestorUsuario.buscarPorNombreOrdenado(nombre);
             System.out.println("=== Usuarios Encontrados ===");
             resultados.forEach(System.out::println);
+            System.out.println();
+        } catch (excepciones.UsuarioNoEncontradoExcepcion e) {
+            System.out.println("❌ " + e.getMessage());
         }
-        System.out.println();
     }
 
     private static void buscarRecursoPorTituloExacto() {
         System.out.print("Ingrese el título exacto del recurso: ");
         String titulo = scanner.nextLine();
-        RecursoDigital recurso = GestorRecursos.buscarPorTitulo(titulo);
-
-        if (recurso != null) {
+        try {
+            RecursoDigital recurso = GestorRecursos.buscarPorTituloExactoConExcepcion(titulo); // Asegurate de tener este método
             System.out.println("✅ Recurso encontrado:");
             System.out.println(recurso.mostrar());
-        } else {
-            System.out.println("❌ No se encontró un recurso con ese título.");
+            System.out.println();
+        } catch (excepciones.RecursoNoDisponibleExcepcion e) {
+            System.out.println("❌ " + e.getMessage());
         }
-        System.out.println();
     }
 
     private static void buscarRecursosPorPalabraEnTitulo() {
         System.out.print("Ingrese una palabra clave del título: ");
         String palabra = scanner.nextLine();
-        List<RecursoDigital> resultados = GestorRecursos.buscarPorFragmentoTitulo(palabra);
-
-        if (resultados.isEmpty()) {
-            System.out.println("⚠️ No se encontraron recursos con esa palabra.");
-        } else {
+        try {
+            List<RecursoDigital> resultados = GestorRecursos.buscarPorFragmentoTitulo(palabra);
             System.out.println("=== Recursos Encontrados ===");
             resultados.forEach(r -> System.out.println(r.mostrar()));
+            System.out.println();
+        } catch (excepciones.RecursoNoDisponibleExcepcion e) {
+            System.out.println("❌ " + e.getMessage());
         }
-        System.out.println();
     }
 
     private static void listarOrdenadoPorTitulo() {
@@ -283,17 +281,16 @@ public class CLI {
     }
 
     private static void buscarUsuarioPorFragmento() {
-        System.out.print("Ingrese fragmento del nombre o apellido: ");
-        String frag = scanner.nextLine();
-        List<Usuario> resultados = GestorUsuario.buscarPorFragmentoNombre(frag);
-
-        if (resultados.isEmpty()) {
-            System.out.println("⚠️ No se encontraron usuarios.");
-        } else {
+        System.out.print("Ingrese parte del nombre o apellido: ");
+        String fragmento = scanner.nextLine();
+        try {
+            List<Usuario> resultados = GestorUsuario.buscarPorFragmento(fragmento);
             System.out.println("=== Usuarios Encontrados ===");
             resultados.forEach(System.out::println);
+            System.out.println();
+        } catch (excepciones.UsuarioNoEncontradoExcepcion e) {
+            System.out.println("❌ " + e.getMessage());
         }
-        System.out.println();
     }
 
     private static void listarUsuariosPorApellido() {
@@ -322,20 +319,22 @@ public class CLI {
         System.out.println("Seleccione una categoría:");
         mostrarCategoriasDisponibles();
         CategoriaRecurso[] categorias = CategoriaRecurso.values();
-        int opcion = Integer.parseInt(scanner.nextLine()) - 1;
-        if (opcion < 0 || opcion >= categorias.length) {
-            System.out.println("❌ Categoría inválida.\n");
-            return;
-        }
-        CategoriaRecurso categoriaSeleccionada = categorias[opcion];
-        List<RecursoDigital> resultados = GestorRecursos.buscarPorCategoria(categoriaSeleccionada);
-        if (resultados.isEmpty()) {
-            System.out.println("⚠️ No se encontraron recursos de la categoría seleccionada.");
-        } else {
+        try {
+            int opcion = Integer.parseInt(scanner.nextLine()) - 1;
+            if (opcion < 0 || opcion >= categorias.length) {
+                System.out.println("❌ Categoría inválida.\n");
+                return;
+            }
+            CategoriaRecurso categoriaSeleccionada = categorias[opcion];
+            List<RecursoDigital> resultados = GestorRecursos.buscarPorCategoria(categoriaSeleccionada);
             System.out.println("=== Recursos en la categoría " + categoriaSeleccionada + " ===");
             resultados.forEach(r -> System.out.println(r.mostrar()));
+            System.out.println();
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Entrada inválida. Ingrese un número.");
+        } catch (excepciones.RecursoNoDisponibleExcepcion e) {
+            System.out.println("❌ " + e.getMessage());
         }
-        System.out.println();
     }
 
     private static void mostrarCategoriasDisponibles() {

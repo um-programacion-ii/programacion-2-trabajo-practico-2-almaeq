@@ -121,4 +121,12 @@ public class GestorRecursos {
                 .sorted(Comparadores.POR_RENOVABLE)
                 .toList();
     }
+
+    public static RecursoDigital buscarPorTituloExactoConExcepcion(String titulo) throws RecursoNoDisponibleExcepcion {
+        return recursos.stream()
+                .filter(r -> r.getTitulo().equalsIgnoreCase(titulo))
+                .findFirst()
+                .orElseThrow(() -> new RecursoNoDisponibleExcepcion("No se encontró un recurso con el título: " + titulo));
+    }
+
 }

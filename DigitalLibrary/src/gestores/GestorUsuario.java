@@ -33,15 +33,17 @@ public class GestorUsuario {
                 .orElseThrow(() -> new UsuarioNoEncontradoExcepcion("Usuario con ID " + id + " no encontrado."));
     }
 
-
-    // ✅ Buscar por fragmento en nombre o apellido (ignora mayúsculas)
-    public static List<Usuario> buscarPorFragmentoNombre(String fragmento) {
+    public static List<Usuario> buscarPorFragmento(String fragmento) throws UsuarioNoEncontradoExcepcion {
         String f = fragmento.toLowerCase();
-        return usuarios.values()
+        List<Usuario> resultado = usuarios.values()
                 .stream()
                 .filter(u -> u.getNombre().toLowerCase().contains(f)
                         || u.getApellido().toLowerCase().contains(f))
-                .collect(Collectors.toList());
+                .toList();
+        if (resultado.isEmpty()) {
+            throw new UsuarioNoEncontradoExcepcion("No se encontraron usuarios que coincidan con: " + fragmento);
+        }
+        return resultado;
     }
 
     public static void mostrarListado() {
