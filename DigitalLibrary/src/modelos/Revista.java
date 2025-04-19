@@ -156,6 +156,7 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
 
     @Override
     public void configurarNotificaciones(List<ServicioNotificaciones> servicios, String destinatario) {
+        this.serviciosNotificaciones.clear(); // ✅ Evita duplicados
         for (ServicioNotificaciones servicio : servicios) {
             agregarServicioNotificacion(servicio);
         }

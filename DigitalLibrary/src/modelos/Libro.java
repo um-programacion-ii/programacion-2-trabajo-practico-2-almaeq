@@ -152,7 +152,6 @@ public class Libro extends RecursoDigital implements Prestable, Renovable, Notif
     }
 
     private void notificar(String mensaje) {
-
         for (ServicioNotificaciones servicio : serviciosNotificaciones) {
             if (destinatarioNotificacion != null && servicio.estaActivo(destinatarioNotificacion)) {
                 servicio.enviarNotificacion(destinatarioNotificacion, mensaje);
@@ -161,13 +160,8 @@ public class Libro extends RecursoDigital implements Prestable, Renovable, Notif
     }
 
     @Override
-    public void configurarNotificaciones(ServicioNotificaciones servicio, String destinatario) {
-        agregarServicioNotificacion(servicio);
-        setDestinatarioNotificacion(destinatario);
-    }
-
-    @Override
     public void configurarNotificaciones(List<ServicioNotificaciones> servicios, String destinatario) {
+        this.serviciosNotificaciones.clear(); // ✅ Evita duplicados
         for (ServicioNotificaciones servicio : servicios) {
             agregarServicioNotificacion(servicio);
         }
