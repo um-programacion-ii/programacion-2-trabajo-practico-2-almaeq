@@ -2,7 +2,8 @@ package CLI;
 
 import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
-import recursos.*;
+import gestores.GestorPrestamo;
+import modelos.*;
 import gestores.GestorUsuario;
 import gestores.GestorRecursos;
 import servicios.ServicioNotificaciones;
@@ -18,6 +19,9 @@ import java.util.Scanner;
 public class CLI {
 
     private static final Scanner scanner = new Scanner(System.in);
+    private static final GestorRecursos gestorRecursos = new GestorRecursos();
+    private static final GestorUsuario gestorUsuario = new GestorUsuario();
+    private static final GestorPrestamo gestorPrestamo = new GestorPrestamo(gestorRecursos, gestorUsuario, scanner);
 
     public static void iniciar() {
         int opcion;
@@ -33,13 +37,11 @@ public class CLI {
                 case 2 -> submenuBuscarUsuario();
                 case 3 -> crearRecursoDigital();
                 case 4 -> submenuBuscarRecurso();
-                case 5 -> prestarRecurso();
-                case 6 -> devolverRecurso();
-                case 7 -> renovarRecurso();
-                case 8 -> System.out.println("Saliendo...");
+                case 5 -> submenuPrestamos();
+                case 6 -> System.out.println("Saliendo...");
                 default -> System.out.println("❌ Opción inválida.\n");
             }
-        } while (opcion != 8);
+        } while (opcion != 6);
     }
 
     private static void mostrarMenu() {
@@ -49,10 +51,8 @@ public class CLI {
                 2. Buscar Usuario
                 3. Crear Recurso Digital
                 4. Buscar Recurso
-                5. Prestar Recurso
-                6. Devolver Recurso
-                7. Renovar Recurso
-                8. Salir
+                5. Gestionar Prestamos
+                6. Salir
                 Ingrese una opción:
                 """);
     }
@@ -118,6 +118,53 @@ public class CLI {
         } while (opcion != 8);
     }
 
+    private static void submenuPrestamos() {
+        int opcion;
+        do {
+            System.out.println("""
+            === GESTIÓN DE PRÉSTAMOS ===
+            1. Registrar Préstamo
+            2. Devolver Préstamo
+            3. Renovar Préstamo
+            4. Listar Préstamos
+            5. Volver al Menú Principal
+        """);
+
+            try {
+                opcion = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                opcion = -1;
+            }
+
+            switch (opcion) {
+                case 1 -> gestorPrestamo.registrarPrestamoInteractivo();
+                case 2 -> {
+                    System.out.print("Ingrese el ID del préstamo a devolver: ");
+                    int id = Integer.parseInt(scanner.nextLine());
+                    Prestamo prestamo = gestorPrestamo.buscarPorId(id);
+                    if (prestamo != null) {
+                        gestorPrestamo.devolverPrestamo(prestamo);
+                    } else {
+                        System.out.println("❌ Préstamo no encontrado.");
+                    }
+                }
+                case 3 -> {
+                    System.out.print("Ingrese el ID del préstamo a renovar: ");
+                    int id = Integer.parseInt(scanner.nextLine());
+                    if (gestorPrestamo.renovarPrestamo(id)) {
+                        System.out.println("✅ Préstamo renovado correctamente.");
+                    } else {
+                        System.out.println("❌ No se pudo renovar el préstamo.");
+                    }
+                }
+                case 4 -> gestorPrestamo.mostrarTodos();
+                case 5 -> System.out.println("↩️ Volviendo al menú principal...\n");
+                default -> System.out.println("❌ Opción inválida.\n");
+            }
+
+        } while (opcion != 5);
+    }
+
     private static void crearUsuario() {
         Usuario nuevo = GestorUsuario.crearUsuarioDesdeInput(scanner);
         System.out.println("✅ Usuario creado con éxito: " + nuevo + "\n");
@@ -147,77 +194,6 @@ public class CLI {
         }
         GestorRecursos.agregar(recurso);
         System.out.println("✅ Recurso agregado con éxito.\n");
-    }
-
-    private static void prestarRecurso() {
-        // Verificar que haya usuarios
-        if (GestorUsuario.estaVacio()) {
-            System.out.println("⚠️ No hay usuarios registrados. Cree uno primero.\n");
-            return;
-        }
-        // Verificar que haya recursos
-        if (GestorRecursos.estaVacio()) {
-            System.out.println("⚠️ No hay recursos digitales cargados.\n");
-            return;
-        }
-        // Mostrar recursos disponibles
-        GestorRecursos.mostrarListado();
-        try {
-            // Seleccionar usuario
-            System.out.println("Seleccione un usuario por ID para prestar el recurso:");
-            GestorUsuario.listar().forEach(u ->
-                    System.out.println("- ID: " + u.getID() + " | " + u.getNombre() + " " + u.getApellido()));
-            int userId = Integer.parseInt(scanner.nextLine());
-            Usuario usuario = GestorUsuario.buscarPorId(userId);
-            if (usuario == null) {
-                throw new excepciones.UsuarioNoEncontradoExcepcion("Usuario con ID " + userId + " no encontrado.");
-            }
-            // Ingresar ID del recurso
-            System.out.print("Ingrese el ID del recurso a prestar: ");
-            String recursoId = scanner.nextLine();
-            RecursoDigital recurso = GestorRecursos.buscarPorId(recursoId);
-            if (recurso == null) {
-                throw new excepciones.RecursoNoDisponibleExcepcion("Recurso con ID " + recursoId + " no encontrado.");
-            }
-            // Configurar notificaciones
-            ServicioNotificacionesEmail email = new ServicioNotificacionesEmail();
-            ServicioNotificacionesSMS sms = new ServicioNotificacionesSMS();
-            email.activarNotificaciones(usuario.getEmail());
-            sms.activarNotificaciones(usuario.getEmail());
-            List<ServicioNotificaciones> servicios = new ArrayList<>();
-            servicios.add(email);
-            servicios.add(sms);
-            recurso.configurarNotificaciones(servicios, usuario.getEmail());
-
-            recurso.prestarSiEsPosible();
-
-        } catch (excepciones.UsuarioNoEncontradoExcepcion | excepciones.RecursoNoDisponibleExcepcion e) {
-            System.out.println("❌ " + e.getMessage());
-        } catch (NumberFormatException e) {
-            System.out.println("❌ Entrada inválida. Debe ingresar un número de ID válido.");
-        }
-    }
-
-    private static void devolverRecurso() {
-        System.out.print("Ingrese el ID del recurso a devolver: ");
-        String id = scanner.nextLine();
-        RecursoDigital encontrado = GestorRecursos.buscarPorId(id);
-        if (encontrado != null) {
-            encontrado.devolverSiEsPosible();
-        } else {
-            System.out.println("❌ Recurso no encontrado.");
-        }
-    }
-
-    private static void renovarRecurso() {
-        System.out.print("Ingrese el ID del recurso a renovar: ");
-        String id = scanner.nextLine();
-        RecursoDigital encontrado = GestorRecursos.buscarPorId(id);
-        if (encontrado != null) {
-            encontrado.renovarSiEsPosible();
-        } else {
-            System.out.println("❌ Recurso no encontrado.");
-        }
     }
 
     private static void buscarUsuarioPorNombre() {

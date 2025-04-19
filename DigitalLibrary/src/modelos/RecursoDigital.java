@@ -1,4 +1,4 @@
-package recursos;
+package modelos;
 
 import enums.EstadoRecurso;
 import interfaces.IRecursoDigital;
@@ -52,6 +52,10 @@ public abstract class RecursoDigital implements IRecursoDigital {
 
     public boolean esRenovable() {
         return false; // Por defecto
+    }
+
+    public boolean esPrestable() {
+        return estado == EstadoRecurso.DISPONIBLE;
     }
 
     public abstract String mostrar();

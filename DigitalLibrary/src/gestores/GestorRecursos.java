@@ -3,13 +3,12 @@ package gestores;
 import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
 import excepciones.RecursoNoDisponibleExcepcion;
-import recursos.*;
+import modelos.*;
 import utils.Comparadores;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class GestorRecursos {
 

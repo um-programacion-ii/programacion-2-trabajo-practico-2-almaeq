@@ -1,7 +1,7 @@
 package utils;
 
 import enums.EstadoRecurso;
-import recursos.RecursoDigital;
+import modelos.RecursoDigital;
 import usuario.Usuario;
 
 import java.util.Comparator;

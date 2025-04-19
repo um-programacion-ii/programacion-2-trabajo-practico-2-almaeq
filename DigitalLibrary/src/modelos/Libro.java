@@ -1,18 +1,19 @@
-package recursos;
+package modelos;
 
 import enums.EstadoRecurso;
 import interfaces.Notificable;
-import interfaces.Renovable;
 import interfaces.Prestable;
+import interfaces.Renovable;
 import servicios.ServicioNotificaciones;
-
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Revista extends RecursoDigital implements Renovable, Prestable, Notificable {
-    private int numero;private boolean prestado = false;
+public class Libro extends RecursoDigital implements Prestable, Renovable, Notificable {
+    private int cant_paginas;
+    private String autor;
+    private boolean prestado = false;
     private LocalDate fechaPrestamo;
     private LocalDate fechaDevolucion;
     private int renovacionesDisponibles = 1;
@@ -20,18 +21,28 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
     private final List<ServicioNotificaciones> serviciosNotificaciones = new ArrayList<>();
     private String destinatarioNotificacion;
 
-    public Revista(String titulo, String identificador, enums.EstadoRecurso estado, int numero) {
+
+    public Libro(String titulo, String identificador, enums.EstadoRecurso estado, int cant_paginas, String autor) {
         super(titulo, identificador, estado);
-        this.numero = numero;
+        this.cant_paginas = cant_paginas;
+        this.autor = autor;
     }
 
     // === GETTERS Y SETTERS ===
-    public int getNumero() {
-        return numero;
+    public int getCant_paginas() {
+        return cant_paginas;
     }
 
-    public void setNumero(int numero) {
-        this.numero = numero;
+    public void setCant_paginas(int cant_paginas) {
+        this.cant_paginas = cant_paginas;
+    }
+
+    public String getAutor() {
+        return autor;
+    }
+
+    public void setAutor(String autor) {
+        this.autor = autor;
     }
 
     // === MÉTODOS DE INTERFACES ===
@@ -48,7 +59,7 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
             fechaPrestamo = LocalDate.now();
             fechaDevolucion = null;
             renovacionesDisponibles = 1; // resetear
-            notificar("📘 Se prestó la revista: " + getTitulo());
+            notificar("📘 Se prestó el libro: " + getTitulo());
         }
     }
 
@@ -58,7 +69,7 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
             prestado = false;
             estado = EstadoRecurso.DISPONIBLE;
             fechaDevolucion = LocalDate.now();
-            notificar("📘 Se devolvió la revista: " + getTitulo());
+            notificar("📘 Se devolvió el libro: " + getTitulo());
         }
     }
 
@@ -82,16 +93,16 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
         if (puedeRenovarse()) {
             fechaPrestamo = LocalDate.now();
             renovacionesDisponibles--;
-            notificar("🔁 Se renovó la revista: " + getTitulo());
+            notificar("🔁 Se renovó el libro: " + getTitulo());
             System.out.println("🔁 Libro renovado con éxito.");
         } else {
-            System.out.println("⚠️ No se puede renovar el libro.");
+            System.out.println("⚠️ No sea puede renovar el libro.");
         }
     }
 
     @Override
     public boolean esRenovable() {
-        return puedeRenovarse(); // ya que Libro implementa Renovable
+        return prestado && renovacionesDisponibles > 0;
     }
 
     @Override
@@ -128,7 +139,7 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
         String prestamoInfo = prestado
                 ? " (Prestado desde: " + fechaPrestamo + (puedeRenovarse() ? ", renovable" : ", sin renovaciones") + ")"
                 : (fechaDevolucion != null ? " (Devuelto el: " + fechaDevolucion + ")" : "");
-        return "📘 ID: " + identificador  + " | Revista - " + titulo + " | Nº: " + numero + " | Estado: " + estado + " | Estado: " + estado + prestamoInfo;
+        return "📘 ID: " + identificador  + " | Libro - " + titulo + " | Autor: " + autor + " | Páginas: " + cant_paginas + " | Estado: " + estado + prestamoInfo;
     }
 
     // === MÉTODOS PARA NOTIFICACIONES ===
@@ -149,13 +160,8 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
     }
 
     @Override
-    public void configurarNotificaciones(ServicioNotificaciones servicio, String destinatario) {
-        agregarServicioNotificacion(servicio);
-        setDestinatarioNotificacion(destinatario);
-    }
-
-    @Override
     public void configurarNotificaciones(List<ServicioNotificaciones> servicios, String destinatario) {
+        this.serviciosNotificaciones.clear(); // ✅ Evita duplicados
         for (ServicioNotificaciones servicio : servicios) {
             agregarServicioNotificacion(servicio);
         }
@@ -166,6 +172,5 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
     public String toString() {
         return mostrar(); // o directamente implementá el texto acá si querés
     }
-
 
 }

@@ -1,4 +1,4 @@
-package recursos;
+package modelos;
 
 
 import enums.EstadoRecurso;
@@ -91,7 +91,14 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
     }
 
     @Override
-    public void renovarSiEsPosible() {}
+    public boolean esRenovable() {
+        return false;  // por seguridad
+    }
+
+    @Override
+    public void renovarSiEsPosible() {
+        System.out.println("⚠️ Los audiolibros no se pueden renovar.");
+    }
 
     @Override
     public void devolverSiEsPosible() {
@@ -136,6 +143,7 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
 
     @Override
     public void configurarNotificaciones(List<ServicioNotificaciones> servicios, String destinatario) {
+        this.serviciosNotificaciones.clear(); // ✅ Evita duplicados
         for (ServicioNotificaciones servicio : servicios) {
             agregarServicioNotificacion(servicio);
         }
@@ -144,7 +152,7 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
 
     @Override
     public String toString() {
-        return mostrar(); // o directamente implementá el texto acá si querés
+        return mostrar();
     }
 
 }
