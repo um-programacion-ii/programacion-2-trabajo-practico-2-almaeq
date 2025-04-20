@@ -5,16 +5,17 @@ import enums.PrioridadReserva;
 import usuario.Usuario;
 
 import java.time.LocalDate;
+import java.util.Date;
 
-public class Reserva {
+public class Reserva implements Comparable<Reserva>{
     int id;
     private Usuario usuario;
     private RecursoDigital recurso;
     private PrioridadReserva prioridad;
-    private LocalDate fechaReserva;
+    private Date fechaReserva;
     private EstadoReserva estado;
 
-    public Reserva(int id, Usuario usuario, RecursoDigital recurso, PrioridadReserva prioridad, LocalDate fechaReserva, EstadoReserva estado) {
+    public Reserva(int id, Usuario usuario, RecursoDigital recurso, PrioridadReserva prioridad, Date fechaReserva, EstadoReserva estado) {
         this.id = id;
         this.usuario = usuario;
         this.recurso = recurso;
@@ -39,12 +40,26 @@ public class Reserva {
         return prioridad;
     }
 
-    public LocalDate getFechaReserva() {
+    public Date getFechaReserva() {
         return fechaReserva;
     }
 
     public EstadoReserva getEstado() {
         return estado;
+    }
+
+    public void setEstado(EstadoReserva estado) {
+        this.estado = estado;
+    }
+
+    @Override
+    public int compareTo(Reserva otra) {
+        int cmp = this.prioridad.compareTo(otra.prioridad);
+        if (cmp == 0) {
+            // Si tienen la misma prioridad, comparar por fecha (la más vieja primero)
+            return this.fechaReserva.compareTo(otra.fechaReserva);
+        }
+        return cmp;
     }
 
     @Override

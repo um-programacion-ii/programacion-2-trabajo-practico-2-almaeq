@@ -1,7 +1,7 @@
 package gestores;
 
 import enums.EstadoRecurso;
-import enums.EstadosPrestamo;
+import enums.EstadoPrestamo;
 import excepciones.RecursoNoDisponibleExcepcion;
 import excepciones.UsuarioNoEncontradoExcepcion;
 import modelos.Prestamo;
@@ -103,7 +103,7 @@ public class GestorPrestamo {
         recurso.prestarSiEsPosible();
 
         int id = generadorId.getAndIncrement();
-        Prestamo nuevo = new Prestamo(id, recurso, usuario, LocalDate.now(), null, EstadosPrestamo.PRESTADO, 0);
+        Prestamo nuevo = new Prestamo(id, recurso, usuario, LocalDate.now(), null, EstadoPrestamo.PRESTADO, 0);
         prestamos.add(nuevo);
         recurso.actualizarEstado(EstadoRecurso.PRESTADO);
         return nuevo;
