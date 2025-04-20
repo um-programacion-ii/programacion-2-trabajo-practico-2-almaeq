@@ -2,10 +2,9 @@ package CLI;
 
 import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
-import gestores.GestorPrestamo;
+import enums.PrioridadReserva;
+import gestores.*;
 import modelos.*;
-import gestores.GestorUsuario;
-import gestores.GestorRecursos;
 import servicios.ServicioNotificaciones;
 import servicios.ServicioNotificacionesEmail;
 import servicios.ServicioNotificacionesSMS;
@@ -21,7 +20,8 @@ public class CLI {
     private static final Scanner scanner = new Scanner(System.in);
     private static final GestorRecursos gestorRecursos = new GestorRecursos();
     private static final GestorUsuario gestorUsuario = new GestorUsuario();
-    private static final GestorPrestamo gestorPrestamo = new GestorPrestamo(gestorRecursos, gestorUsuario, scanner);
+    private static final GestorReserva gestorReserva = new GestorReserva(gestorUsuario, gestorRecursos);
+    private static final GestorPrestamo gestorPrestamo = new GestorPrestamo(gestorRecursos, gestorUsuario,gestorReserva,scanner);
 
     public static void iniciar() {
         int opcion;
@@ -38,10 +38,11 @@ public class CLI {
                 case 3 -> crearRecursoDigital();
                 case 4 -> submenuBuscarRecurso();
                 case 5 -> submenuPrestamos();
-                case 6 -> System.out.println("Saliendo...");
+                case 6 -> submenuReservas(gestorReserva);
+                case 7-> System.out.println("Saliendo...");
                 default -> System.out.println("❌ Opción inválida.\n");
             }
-        } while (opcion != 6);
+        } while (opcion != 7);
     }
 
     private static void mostrarMenu() {
@@ -52,7 +53,8 @@ public class CLI {
                 3. Crear Recurso Digital
                 4. Buscar Recurso
                 5. Gestionar Prestamos
-                6. Salir
+                6. Gestionar Reservas
+                7. Salir
                 Ingrese una opción:
                 """);
     }
@@ -144,6 +146,7 @@ public class CLI {
                     Prestamo prestamo = gestorPrestamo.buscarPorId(id);
                     if (prestamo != null) {
                         gestorPrestamo.devolverPrestamo(prestamo);
+                        System.out.println("ℹ️ Si había una reserva pendiente, se notificó al usuario correspondiente.");
                     } else {
                         System.out.println("❌ Préstamo no encontrado.");
                     }
@@ -320,5 +323,52 @@ public class CLI {
             System.out.println((i + 1) + ". " + categorias[i]);
         }
     }
+
+    private static void submenuReservas(GestorReserva gestorReserva) {
+        int opcion;
+        do {
+            System.out.println("""
+        === GESTIÓN DE RESERVAS ===
+        1. Registrar Reserva
+        2. Cancelar Reserva
+        3. Completar Reserva
+        4. Mostrar todas las Reservas
+        5. Mostrar Reservas Activas
+        6. Mostrar Reservas Canceladas
+        7. Mostrar Reservas Completadas
+        8. Mostrar Próxima Reserva
+        9. Volver al Menú Principal
+        """);
+
+            try {
+                opcion = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                opcion = -1;
+            }
+
+            switch (opcion) {
+                case 1 -> gestorReserva.registrarReserva(scanner); // 👈 Sin prioridad manual
+                case 2 -> {
+                    System.out.print("Ingrese el ID de la reserva a cancelar: ");
+                    int id = Integer.parseInt(scanner.nextLine());
+                    gestorReserva.cancelarReserva(id);
+                }
+                case 3 -> {
+                    System.out.print("Ingrese el ID de la reserva a completar: ");
+                    int id = Integer.parseInt(scanner.nextLine());
+                    gestorReserva.completarReserva(id);
+                }
+                case 4 -> gestorReserva.listarReservas();
+                case 5 -> gestorReserva.listarReservasActivas();
+                case 6 -> gestorReserva.listarReservasCanceladas();
+                case 7 -> gestorReserva.listarReservasCompletadas();
+                case 8 -> gestorReserva.mostrarProximaReserva();
+                case 9 -> System.out.println("↩️ Volviendo al menú principal...\n");
+                default -> System.out.println("❌ Opción inválida.");
+            }
+
+        } while (opcion != 9);
+    }
+
 
 }

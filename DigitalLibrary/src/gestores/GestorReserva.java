@@ -9,16 +9,16 @@ import modelos.RecursoDigital;
 import modelos.Reserva;
 import usuario.Usuario;
 
-import java.util.Date;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GestorReserva {
-    private final BlockingQueue<Reserva> colaReservas = new PriorityBlockingQueue<>();
-    private final GestorUsuario gestorUsuario;
-    private final GestorRecursos gestorRecursos;
+public class GestorReserva  {
+    private BlockingQueue<Reserva> colaReservas = new PriorityBlockingQueue<>();
+    private final List<Reserva> historialReservas = new ArrayList<>();
+    private GestorUsuario gestorUsuario;
+    private GestorRecursos gestorRecursos;
     private static final AtomicInteger generadorId = new AtomicInteger(1);
 
     public GestorReserva(GestorUsuario gestorUsuario, GestorRecursos gestorRecursos) {
@@ -26,14 +26,19 @@ public class GestorReserva {
         this.gestorRecursos = gestorRecursos;
     }
 
-    public void registrarReserva(PrioridadReserva prioridad, Scanner scanner) {
+    public List<Reserva> getHistorialReservas() {
+        return historialReservas;
+    }
+
+    public void registrarReserva(Scanner scanner) {
         try {
             Usuario usuario = solicitarUsuario(scanner);
             RecursoDigital recurso = solicitarRecurso(scanner);
 
             if (validarReserva(usuario, recurso)) {
-                Reserva reserva = crearReserva(usuario, recurso, prioridad);
+                Reserva reserva = crearReserva(usuario, recurso);
                 colaReservas.add(reserva);
+                recalcularPrioridades(); // ⚠️ Se recalculan las prioridades en cada alta
                 System.out.println("✅ Reserva registrada con éxito:\n" + reserva);
             } else {
                 System.out.println("❌ La reserva no pudo ser registrada.");
@@ -43,15 +48,6 @@ public class GestorReserva {
             System.out.println("❌ Error al registrar la reserva: " + e.getMessage());
         } catch (NumberFormatException e) {
             System.out.println("❌ ID de usuario inválido.");
-        }
-    }
-
-    public void mostrarProximaReserva() {
-        Reserva proxima = colaReservas.peek();
-        if (proxima != null) {
-            System.out.println("🎯 Próxima reserva a atender:\n" + proxima);
-        } else {
-            System.out.println("📭 No hay reservas pendientes.");
         }
     }
 
@@ -67,20 +63,20 @@ public class GestorReserva {
         return gestorRecursos.buscarPorTitulo(titulo);
     }
 
-    public Reserva crearReserva(Usuario usuario, RecursoDigital recurso, PrioridadReserva prioridad) {
+    public Reserva crearReserva(Usuario usuario, RecursoDigital recurso) {
         return new Reserva(
                 generadorId.getAndIncrement(),
                 usuario,
                 recurso,
-                prioridad,
+                PrioridadReserva.MEDIA, // Se asigna una prioridad neutral
                 new Date(),
                 EstadoReserva.ACTIVA
         );
     }
 
     public boolean validarReserva(Usuario usuario, RecursoDigital recurso) {
-        if (!recurso.esPrestable()) {
-            System.out.println("⚠️ El recurso no está disponible para ser reservado.");
+        if (recurso.getEstado() == EstadoRecurso.DISPONIBLE) {
+            System.out.println("⚠️ El recurso está disponible, no es necesario reservarlo.");
             return false;
         }
         for (Reserva r : colaReservas) {
@@ -94,40 +90,47 @@ public class GestorReserva {
         return true;
     }
 
-    public boolean cancelarReserva(int idReserva) {
-        for (Reserva r : colaReservas) {
-            if (r.getId() == idReserva && r.getEstado() == EstadoReserva.ACTIVA) {
-                colaReservas.remove(r);
-                r.setEstado(EstadoReserva.CANCELADA);
-                colaReservas.add(r); // opcional
-                System.out.println("❌ Reserva #" + idReserva + " cancelada.");
-                return true;
-            }
-        }
-        System.out.println("⚠️ Reserva no encontrada o ya no está activa.");
-        return false;
-    }
-
-    public boolean completarReserva(int idReserva) {
+    public void completarReserva(int idReserva) {
         for (Reserva r : colaReservas) {
             if (r.getId() == idReserva && r.getEstado() == EstadoReserva.ACTIVA) {
                 colaReservas.remove(r);
                 r.setEstado(EstadoReserva.COMPLETADA);
+                historialReservas.add(r);  // ✅ Guardás en el historial
                 System.out.println("✅ Reserva #" + idReserva + " marcada como completada.");
-                return true;
+                recalcularPrioridades(); // 👈 Recalcula después de completar
+                return;
             }
         }
         System.out.println("⚠️ Reserva no encontrada o ya no está activa.");
-        return false;
+    }
+
+    public void cancelarReserva(int idReserva) {
+        for (Reserva r : colaReservas) {
+            if (r.getId() == idReserva && r.getEstado() == EstadoReserva.ACTIVA) {
+                colaReservas.remove(r);
+                r.setEstado(EstadoReserva.CANCELADA);
+                historialReservas.add(r);  // ✅ Guardás en el historial
+                System.out.println("❌ Reserva #" + idReserva + " cancelada.");
+                recalcularPrioridades(); // 👈 Recalcula después de cancelar
+                return;
+            }
+        }
+        System.out.println("⚠️ Reserva no encontrada o ya no está activa.");
     }
 
     public void listarReservas() {
-        if (colaReservas.isEmpty()) {
+        if (colaReservas.isEmpty() && historialReservas.isEmpty()) {
             System.out.println("📭 No hay reservas registradas.");
             return;
         }
-        System.out.println("📋 Listado de Reservas:");
+
+        System.out.println("📋 Reservas activas:");
         colaReservas.stream()
+                .sorted()
+                .forEach(System.out::println);
+
+        System.out.println("\n📋 Reservas canceladas y completadas:");
+        historialReservas.stream()
                 .sorted()
                 .forEach(System.out::println);
     }
@@ -142,7 +145,7 @@ public class GestorReserva {
 
     public void listarReservasCanceladas() {
         System.out.println("📋 Reservas Canceladas:");
-        colaReservas.stream()
+        historialReservas.stream() // ⬅️ acá
                 .filter(r -> r.getEstado() == EstadoReserva.CANCELADA)
                 .sorted()
                 .forEach(System.out::println);
@@ -150,9 +153,52 @@ public class GestorReserva {
 
     public void listarReservasCompletadas() {
         System.out.println("📋 Reservas Completadas:");
-        colaReservas.stream()
+        historialReservas.stream()
                 .filter(r -> r.getEstado() == EstadoReserva.COMPLETADA)
                 .sorted()
                 .forEach(System.out::println);
     }
+
+    public void mostrarProximaReserva() {
+        Reserva proxima = colaReservas.peek();
+        if (proxima != null) {
+            System.out.println("🎯 Próxima reserva a atender:\n" + proxima);
+        } else {
+            System.out.println("📭 No hay reservas pendientes.");
+        }
+    }
+
+    public void recalcularPrioridades() {
+        // Extraer todas las reservas activas de la cola
+        List<Reserva> activas = colaReservas.stream()
+                .filter(r -> r.getEstado() == EstadoReserva.ACTIVA)
+                .sorted(Comparator.comparing(Reserva::getFechaReserva)) // más antiguas primero
+                .toList();
+        // Eliminar todas las reservas activas de la cola
+        colaReservas.removeIf(r -> r.getEstado() == EstadoReserva.ACTIVA);
+        // Recalcular prioridades proporcionales
+        int total = activas.size();
+        for (int i = 0; i < total; i++) {
+            Reserva r = activas.get(i);
+            if (i < total / 3) {
+                r.setPrioridad(PrioridadReserva.ALTA);
+            } else if (i < (2 * total) / 3) {
+                r.setPrioridad(PrioridadReserva.MEDIA);
+            } else {
+                r.setPrioridad(PrioridadReserva.BAJA);
+            }
+            colaReservas.add(r); // Reinsertar en la cola con nueva prioridad
+        }
+        System.out.println("🔄 Prioridades recalculadas dinámicamente.");
+    }
+
+    public Reserva getProximaReservaParaRecurso(RecursoDigital recurso) {
+        return colaReservas.stream()
+                .filter(r -> r.getEstado() == EstadoReserva.ACTIVA && r.getRecurso().equals(recurso))
+                .sorted()
+                .findFirst()
+                .orElse(null);
+    }
+
+
 }

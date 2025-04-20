@@ -6,6 +6,7 @@ import excepciones.RecursoNoDisponibleExcepcion;
 import excepciones.UsuarioNoEncontradoExcepcion;
 import modelos.Prestamo;
 import modelos.RecursoDigital;
+import modelos.Reserva;
 import servicios.ServicioNotificaciones;
 import servicios.ServicioNotificacionesEmail;
 import servicios.ServicioNotificacionesSMS;
@@ -23,13 +24,15 @@ public class GestorPrestamo {
     private static final AtomicInteger generadorId = new AtomicInteger(1);
     private final GestorRecursos gestorRecursos;
     private final GestorUsuario gestorUsuario;
+    private final GestorReserva gestorReserva;
     private final Scanner scanner;
     private final ServicioNotificacionesEmail servicioEmail = new ServicioNotificacionesEmail();
     private final ServicioNotificacionesSMS servicioSMS = new ServicioNotificacionesSMS();
 
-    public GestorPrestamo(GestorRecursos gestorRecursos, GestorUsuario gestorUsuario, Scanner scanner) {
+    public GestorPrestamo(GestorRecursos gestorRecursos, GestorUsuario gestorUsuario , GestorReserva gestorReserva, Scanner scanner) {
         this.gestorRecursos = gestorRecursos;
         this.gestorUsuario = gestorUsuario;
+        this.gestorReserva = gestorReserva;
         this.scanner = scanner;
     }
 
@@ -110,13 +113,27 @@ public class GestorPrestamo {
     }
 
     public void devolverPrestamo(Prestamo prestamo) {
-        configurarNotificaciones(prestamo.getRecurso(), prestamo.getUsuario());
-        // ✅ Este es el que dispara notificaciones
-        prestamo.getRecurso().devolverSiEsPosible();
-        // ✅ Esto solo actualiza el estado lógico del préstamo
+        servicioEmail.activarNotificaciones(prestamo.getUsuario().getEmail());
+        servicioSMS.activarNotificaciones(prestamo.getUsuario().getEmail());
+
+        List<ServicioNotificaciones> servicios = List.of(servicioEmail, servicioSMS);
+        RecursoDigital recurso = prestamo.getRecurso();
+        recurso.configurarNotificaciones(servicios, prestamo.getUsuario().getEmail());
+
         prestamo.devolver();
-        prestamo.getRecurso().actualizarEstado(EstadoRecurso.DISPONIBLE);
-        System.out.println("🔁 El recurso '" + prestamo.getRecurso().getTitulo() + "' ha sido devuelto y está disponible para préstamo.");
+        recurso.actualizarEstado(EstadoRecurso.DISPONIBLE);
+
+        System.out.println("🔁 El recurso '" + recurso.getTitulo() + "' ha sido devuelto y está disponible para préstamo.");
+
+        // 🔔 Buscar la primera reserva activa para ese recurso
+        Reserva proximaReserva = gestorReserva.getProximaReservaParaRecurso(recurso);
+
+        if (proximaReserva != null) {
+            recurso.configurarNotificaciones(servicios, proximaReserva.getUsuario().getEmail());
+            recurso.devolverSiEsPosible(); // solo para que se dispare la notificación
+            System.out.println("📢 Se notificó al usuario " + proximaReserva.getUsuario().getNombre() +
+                    " que el recurso está disponible para préstamo.");
+        }
     }
 
     public boolean renovarPrestamo(int id) {

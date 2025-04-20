@@ -52,6 +52,10 @@ public class Reserva implements Comparable<Reserva>{
         this.estado = estado;
     }
 
+    public void setPrioridad(PrioridadReserva prioridad) {
+        this.prioridad = prioridad;
+    }
+
     @Override
     public int compareTo(Reserva otra) {
         int cmp = this.prioridad.compareTo(otra.prioridad);
