@@ -1,6 +1,6 @@
 package modelos;
 
-import enums.EstadosPrestamo;
+import enums.EstadoPrestamo;
 import usuario.Usuario;
 
 import java.time.LocalDate;
@@ -11,12 +11,12 @@ public class Prestamo {
     private Usuario usuario;
     private LocalDate fechaPrestamo;
     private LocalDate fechaDevolucion;
-    private EstadosPrestamo estado;
+    private EstadoPrestamo estado;
     private int renovaciones = 0;
 
     private static final int MAX_RENOVACIONES = 1;
 
-    public Prestamo(int id, RecursoDigital recurso, Usuario usuario, LocalDate fechaPrestamo, LocalDate fechaDevolucion, EstadosPrestamo estado, int renovaciones) {
+    public Prestamo(int id, RecursoDigital recurso, Usuario usuario, LocalDate fechaPrestamo, LocalDate fechaDevolucion, EstadoPrestamo estado, int renovaciones) {
         this.id = id;
         this.recurso = recurso;
         this.usuario = usuario;
@@ -60,11 +60,11 @@ public class Prestamo {
         this.fechaDevolucion = fechaDevolucion;
     }
 
-    public EstadosPrestamo getEstado() {
+    public EstadoPrestamo getEstado() {
         return estado;
     }
 
-    public void setEstado(EstadosPrestamo estado) {
+    public void setEstado(EstadoPrestamo estado) {
         this.estado = estado;
     }
 
@@ -77,11 +77,11 @@ public class Prestamo {
     }
 
     public boolean estaActivo() {
-        return estado == EstadosPrestamo.PRESTADO || estado == EstadosPrestamo.RENOVADO;
+        return estado == EstadoPrestamo.PRESTADO || estado == EstadoPrestamo.RENOVADO;
     }
 
     public boolean estaDisponible() {
-        return estado == EstadosPrestamo.DISPONIBLE;
+        return estado == EstadoPrestamo.DISPONIBLE;
     }
 
     public boolean puedeRenovarse() {
@@ -89,13 +89,13 @@ public class Prestamo {
     }
 
     public void devolver() {
-        this.estado = EstadosPrestamo.DISPONIBLE;
+        this.estado = EstadoPrestamo.DISPONIBLE;
         this.fechaDevolucion = LocalDate.now();
     }
 
     public void renovar() {
         this.fechaPrestamo = LocalDate.now();
-        this.estado = EstadosPrestamo.RENOVADO;
+        this.estado = EstadoPrestamo.RENOVADO;
         this.renovaciones++;
     }
 
