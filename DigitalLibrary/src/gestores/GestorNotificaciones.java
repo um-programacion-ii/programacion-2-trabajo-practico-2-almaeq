@@ -5,17 +5,19 @@ import servicios.ServicioNotificacionesEmail;
 import servicios.ServicioNotificacionesSMS;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GestorNotificaciones {
-
     private final List<ServicioNotificaciones> servicios;
+    private final ExecutorService executorService;
 
     public GestorNotificaciones() {
-        // Se pueden agregar más servicios en el futuro
         this.servicios = List.of(
                 new ServicioNotificacionesEmail(),
                 new ServicioNotificacionesSMS()
         );
+        this.executorService = Executors.newFixedThreadPool(4); // 🔁 Ajustable según tu carga
     }
 
     public void activarPara(String destinatario) {
@@ -32,13 +34,19 @@ public class GestorNotificaciones {
 
     public void enviar(String destinatario, String mensaje) {
         for (ServicioNotificaciones servicio : servicios) {
-            if (servicio.estaActivo(destinatario)) {
-                servicio.enviarNotificacion(destinatario, mensaje);
-            }
+            executorService.submit(() -> {
+                if (servicio.estaActivo(destinatario)) {
+                    servicio.enviarNotificacion(destinatario, mensaje);
+                }
+            });
         }
     }
 
-    public List<ServicioNotificaciones> getServiciosActivos() {
+    public List<ServicioNotificaciones> getServicios() {
         return servicios;
+    }
+
+    public void shutdown() {
+        executorService.shutdown();
     }
 }
