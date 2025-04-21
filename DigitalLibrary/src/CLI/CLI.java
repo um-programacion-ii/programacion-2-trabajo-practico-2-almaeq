@@ -9,6 +9,8 @@ import servicios.ServicioNotificaciones;
 import servicios.ServicioNotificacionesEmail;
 import servicios.ServicioNotificacionesSMS;
 import usuario.Usuario;
+import utils.SimuladorPrestamos;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,6 +135,7 @@ public class CLI {
             3. Renovar Préstamo
             4. Listar Préstamos
             5. Volver al Menú Principal
+            6. 🧪 Simular operaciones concurrentes
         """);
 
             try {
@@ -166,9 +169,9 @@ public class CLI {
                 case 4 -> gestorPrestamo.mostrarTodos();
                 case 5 -> System.out.println("↩️ Volviendo al menú principal...\n");
                 default -> System.out.println("❌ Opción inválida.\n");
-            }
-
-        } while (opcion != 5);
+                case 6 -> SimuladorPrestamos.ejecutar(gestorUsuario, gestorRecursos, gestorPrestamo);
+                }
+            } while (opcion != 5);
     }
 
     private static void crearUsuario() {
