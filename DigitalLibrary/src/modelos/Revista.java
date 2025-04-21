@@ -20,8 +20,8 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
     private final List<ServicioNotificaciones> serviciosNotificaciones = new ArrayList<>();
     private String destinatarioNotificacion;
 
-    public Revista(String titulo, String identificador, enums.EstadoRecurso estado, int numero) {
-        super(titulo, identificador, estado);
+    public Revista(String titulo, enums.EstadoRecurso estado, int numero) {
+        super(titulo, estado);
         this.numero = numero;
     }
 

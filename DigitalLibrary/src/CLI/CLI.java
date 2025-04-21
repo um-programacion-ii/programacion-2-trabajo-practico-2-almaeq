@@ -2,17 +2,11 @@ package CLI;
 
 import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
-import enums.PrioridadReserva;
 import gestores.*;
 import modelos.*;
-import servicios.ServicioNotificaciones;
-import servicios.ServicioNotificacionesEmail;
-import servicios.ServicioNotificacionesSMS;
 import usuario.Usuario;
 import utils.SimuladorPrestamos;
 
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -24,6 +18,8 @@ public class CLI {
     private static final GestorUsuario gestorUsuario = new GestorUsuario();
     private static final GestorReserva gestorReserva = new GestorReserva(gestorUsuario, gestorRecursos);
     private static final GestorPrestamo gestorPrestamo = new GestorPrestamo(gestorRecursos, gestorUsuario,gestorReserva,scanner);
+    private static final GestorReportes gestorReportes = new GestorReportes(gestorPrestamo);
+
 
     public static void iniciar() {
         int opcion;
@@ -41,27 +37,29 @@ public class CLI {
                 case 4 -> submenuBuscarRecurso();
                 case 5 -> submenuPrestamos();
                 case 6 -> submenuReservas(gestorReserva);
-                case 7 -> {
-                    System.out.println("Saliendo...");
-                    gestorPrestamo.shutdown(); // ✅ cerramos los hilos del ExecutorService
-                }
+                case 7 -> submenuReportes(); // 👈 nuevo
+                case 8 -> System.out.println("Saliendo...");
                 default -> System.out.println("❌ Opción inválida.\n");
             }
-        } while (opcion != 7);
+        } while (opcion != 8);
+
+        gestorPrestamo.shutdown(); // ✅ cerramos al final del todo
     }
+
 
     private static void mostrarMenu() {
         System.out.println("""
-                === MENÚ PRINCIPAL ===
-                1. Crear Usuario
-                2. Buscar Usuario
-                3. Crear Recurso Digital
-                4. Buscar Recurso
-                5. Gestionar Prestamos
-                6. Gestionar Reservas
-                7. Salir
-                Ingrese una opción:
-                """);
+            === MENÚ PRINCIPAL ===
+            1. Crear Usuario
+            2. Buscar Usuario
+            3. Crear Recurso Digital
+            4. Buscar Recurso
+            5. Gestionar Prestamos
+            6. Gestionar Reservas
+            7. Reportes
+            8. Salir
+            Ingrese una opción:
+            """);
     }
 
     private static void submenuBuscarUsuario() {
@@ -191,18 +189,16 @@ public class CLI {
         CategoriaRecurso categoria = categorias[tipo];
         System.out.print("Título: ");
         String titulo = scanner.nextLine();
-        System.out.print("Id: ");
-        String id = scanner.nextLine();
 
         EstadoRecurso estado = EstadoRecurso.DISPONIBLE;
 
-        RecursoDigital recurso = GestorRecursos.crearRecurso(categoria, titulo, id, estado, scanner);
+        RecursoDigital recurso = GestorRecursos.crearRecurso(categoria, titulo, estado, scanner);
         if (recurso == null) {
             System.out.println("❌ No se pudo crear el recurso.\n");
             return;
         }
         GestorRecursos.agregar(recurso);
-        System.out.println("✅ Recurso agregado con éxito.\n");
+        System.out.println("✅ Recurso agregado con éxito. ID generado: " + recurso.getIdentificador() + "\n");
     }
 
     private static void buscarUsuarioPorNombre() {
@@ -374,6 +370,42 @@ public class CLI {
             }
 
         } while (opcion != 9);
+    }
+
+    private static void submenuReportes() {
+        int opcion;
+        do {
+            System.out.println("""
+            === SUBMENÚ DE REPORTES ===
+            1. Recursos más prestados
+            2. Volver al menú principal
+            """);
+
+            try {
+                opcion = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                opcion = -1;
+            }
+
+            switch (opcion) {
+                case 1 -> {
+                    System.out.print("¿Cuántos recursos querés mostrar en el ranking? ");
+                    try {
+                        int top = Integer.parseInt(scanner.nextLine());
+                        if (top > 0) {
+                            gestorReportes.mostrarRecursosMasPrestados(top);
+                        } else {
+                            System.out.println("⚠️ Debe ser un número mayor a 0.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("❌ Número inválido.");
+                    }
+                }
+                case 2 -> System.out.println("↩️ Volviendo al menú principal...");
+                default -> System.out.println("❌ Opción inválida.");
+            }
+
+        } while (opcion != 2);
     }
 
 
