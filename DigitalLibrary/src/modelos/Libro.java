@@ -22,8 +22,8 @@ public class Libro extends RecursoDigital implements Prestable, Renovable, Notif
     private String destinatarioNotificacion;
 
 
-    public Libro(String titulo, String identificador, enums.EstadoRecurso estado, int cant_paginas, String autor) {
-        super(titulo, identificador, estado);
+    public Libro(String titulo, enums.EstadoRecurso estado, int cant_paginas, String autor) {
+        super(titulo, estado);
         this.cant_paginas = cant_paginas;
         this.autor = autor;
     }

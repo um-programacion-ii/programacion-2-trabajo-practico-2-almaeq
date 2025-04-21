@@ -20,8 +20,8 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
     private final List<ServicioNotificaciones> serviciosNotificaciones = new ArrayList<>();
     private String destinatarioNotificacion;
 
-    public Audiolibro(String titulo, String identificador, enums.EstadoRecurso estado, String narrador, double duracion) {
-        super(titulo, identificador, estado);
+    public Audiolibro(String titulo, enums.EstadoRecurso estado, String narrador, double duracion) {
+        super(titulo, estado);
         this.narrador = narrador;
         this.duracion = duracion;
     }

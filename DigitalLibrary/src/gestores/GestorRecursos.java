@@ -79,26 +79,26 @@ public class GestorRecursos {
         }
     }
 
-    public static RecursoDigital crearRecurso(CategoriaRecurso categoria, String titulo, String id, EstadoRecurso estado, Scanner scanner) {
+    public static RecursoDigital crearRecurso(CategoriaRecurso categoria, String titulo, EstadoRecurso estado, Scanner scanner) {
         return switch (categoria) {
             case LIBRO -> {
                 System.out.print("Autor: ");
                 String autor = scanner.nextLine();
                 System.out.print("Cantidad de páginas: ");
                 int paginas = Integer.parseInt(scanner.nextLine());
-                yield new Libro(titulo, id, estado, paginas, autor);
+                yield new Libro(titulo, estado, paginas, autor);
             }
             case REVISTA -> {
                 System.out.print("Número de edición: ");
                 int numero = Integer.parseInt(scanner.nextLine());
-                yield new Revista(titulo, id, estado, numero);
+                yield new Revista(titulo, estado, numero);
             }
             case AUDIOLIBRO -> {
                 System.out.print("Narrador: ");
                 String narrador = scanner.nextLine();
                 System.out.print("Duración (horas): ");
                 double duracion = Double.parseDouble(scanner.nextLine());
-                yield new Audiolibro(titulo, id, estado, narrador, duracion);
+                yield new Audiolibro(titulo, estado, narrador, duracion);
             }
         };
     }
