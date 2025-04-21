@@ -85,7 +85,7 @@ public class GestorPrestamo {
         return recurso;
     }
 
-    public Prestamo crearPrestamo(Usuario usuario, RecursoDigital recurso) throws RecursoNoDisponibleExcepcion {
+    public synchronized Prestamo crearPrestamo(Usuario usuario, RecursoDigital recurso) throws RecursoNoDisponibleExcepcion {
         if (!puedePrestarse(recurso)) {
             throw new RecursoNoDisponibleExcepcion("El recurso no puede ser prestado.");
         }
@@ -98,7 +98,7 @@ public class GestorPrestamo {
         return nuevo;
     }
 
-    public void devolverPrestamo(Prestamo prestamo) {
+    public synchronized void devolverPrestamo(Prestamo prestamo) {
         gestorNotificaciones.activarPara(prestamo.getUsuario().getEmail());
         gestorNotificaciones.enviar(prestamo.getUsuario().getEmail(), "📘 Se devolvió el recurso: " + prestamo.getRecurso().getTitulo());
 
@@ -110,7 +110,7 @@ public class GestorPrestamo {
         gestorReserva.notificarPrimeraReservaDisponible(prestamo.getRecurso());
     }
 
-    public boolean renovarPrestamo(int id) {
+    public synchronized boolean renovarPrestamo(int id) {
         Prestamo p = buscarPorId(id);
         if (p != null && p.estaActivo()) {
             RecursoDigital recurso = p.getRecurso();
