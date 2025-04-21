@@ -39,7 +39,10 @@ public class CLI {
                 case 4 -> submenuBuscarRecurso();
                 case 5 -> submenuPrestamos();
                 case 6 -> submenuReservas(gestorReserva);
-                case 7-> System.out.println("Saliendo...");
+                case 7 -> {
+                    System.out.println("Saliendo...");
+                    gestorPrestamo.shutdown(); // ✅ cerramos los hilos del ExecutorService
+                }
                 default -> System.out.println("❌ Opción inválida.\n");
             }
         } while (opcion != 7);

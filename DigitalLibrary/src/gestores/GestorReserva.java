@@ -202,13 +202,13 @@ public class GestorReserva {
     }
 
     public void notificarPrimeraReservaDisponible(RecursoDigital recurso) {
-        Reserva proxima = getProximaReservaParaRecurso(recurso);
-        if (proxima != null) {
-            recurso.configurarNotificaciones(
-                    new GestorNotificaciones().getServicios(),
-                    proxima.getUsuario().getEmail()
-            );
-            System.out.println("📩 Notificación: el recurso '" + recurso.getTitulo() + "' está disponible para " + proxima.getUsuario().getNombre());
+        Reserva siguiente = getProximaReservaParaRecurso(recurso);
+        if (siguiente != null) {
+            GestorNotificaciones gestorNotificaciones = new GestorNotificaciones();
+            gestorNotificaciones.activarPara(siguiente.getUsuario().getEmail());
+            recurso.configurarNotificaciones(gestorNotificaciones.getServicios(), siguiente.getUsuario().getEmail());
+            gestorNotificaciones.enviar(siguiente.getUsuario().getEmail(),
+                    "📢 El recurso '" + recurso.getTitulo() + "' está disponible para tu reserva.");
         }
     }
 }

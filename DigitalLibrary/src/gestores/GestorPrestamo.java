@@ -38,7 +38,7 @@ public class GestorPrestamo {
             RecursoDigital recurso = seleccionarRecursoDisponible();
 
             gestorNotificaciones.activarPara(usuario.getEmail());
-            recurso.configurarNotificaciones(gestorNotificaciones.getServicios(), usuario.getEmail());
+            gestorNotificaciones.enviar(usuario.getEmail(), "📘 Se prestó el recurso: " + recurso.getTitulo());
 
             Prestamo nuevo = crearPrestamo(usuario, recurso);
 
@@ -100,7 +100,7 @@ public class GestorPrestamo {
 
     public void devolverPrestamo(Prestamo prestamo) {
         gestorNotificaciones.activarPara(prestamo.getUsuario().getEmail());
-        prestamo.getRecurso().configurarNotificaciones(gestorNotificaciones.getServicios(), prestamo.getUsuario().getEmail());
+        gestorNotificaciones.enviar(prestamo.getUsuario().getEmail(), "📘 Se devolvió el recurso: " + prestamo.getRecurso().getTitulo());
 
         prestamo.devolver();
         prestamo.getRecurso().actualizarEstado(EstadoRecurso.DISPONIBLE);
@@ -115,7 +115,7 @@ public class GestorPrestamo {
         if (p != null && p.estaActivo()) {
             RecursoDigital recurso = p.getRecurso();
             gestorNotificaciones.activarPara(p.getUsuario().getEmail());
-            recurso.configurarNotificaciones(gestorNotificaciones.getServicios(), p.getUsuario().getEmail());
+            gestorNotificaciones.enviar(p.getUsuario().getEmail(), "🔁 Se renovó el recurso: " + recurso.getTitulo());
 
             if (recurso.esRenovable() && p.puedeRenovarse()) {
                 p.renovar();
@@ -160,4 +160,7 @@ public class GestorPrestamo {
         }
     }
 
+    public void shutdown() {
+        gestorNotificaciones.shutdown();
+    }
 }

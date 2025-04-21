@@ -26,16 +26,11 @@ public class GestorNotificaciones {
         }
     }
 
-    public void desactivarPara(String destinatario) {
-        for (ServicioNotificaciones servicio : servicios) {
-            servicio.desactivarNotificaciones(destinatario);
-        }
-    }
-
     public void enviar(String destinatario, String mensaje) {
         for (ServicioNotificaciones servicio : servicios) {
             executorService.submit(() -> {
                 if (servicio.estaActivo(destinatario)) {
+                    String tipo = servicio.getClass().getSimpleName(); // Ej: ServicioNotificacionesEmail
                     servicio.enviarNotificacion(destinatario, mensaje);
                 }
             });
