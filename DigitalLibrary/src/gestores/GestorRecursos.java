@@ -79,6 +79,12 @@ public class GestorRecursos {
         }
     }
 
+    public static List<RecursoDigital> listarDisponibles() {
+        return recursos.stream()
+                .filter(r -> r.getEstado() == EstadoRecurso.DISPONIBLE)
+                .toList();
+    }
+
     public static RecursoDigital crearRecurso(CategoriaRecurso categoria, String titulo, EstadoRecurso estado, Scanner scanner) {
         return switch (categoria) {
             case LIBRO -> {

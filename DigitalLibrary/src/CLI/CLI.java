@@ -23,7 +23,6 @@ public class CLI {
     private static final GestorReportes gestorReportes = new GestorReportes(gestorPrestamo);
     private static final GestorNotificaciones gestorNotificaciones = new GestorNotificaciones();
 
-
     public static void iniciar() {
         int opcion;
         do {
@@ -122,9 +121,10 @@ public class CLI {
                 case 5 -> listarOrdenadoPorTitulo();
                 case 6 -> listarOrdenadoPorEstado();
                 case 7 -> listarOrdenadoPorRenovable();
-                case 8 -> System.out.println("↩️ Volviendo...\n");
+                case 8 -> mostrarRecursosDisponibles();
+                case 9 -> System.out.println("↩️ Volviendo...\n");
             }
-        } while (opcion != 8);
+        } while (opcion != 9);
     }
 
     private static void submenuPrestamos() {
@@ -454,7 +454,14 @@ public class CLI {
         } while (opcion != 3);
     }
 
-
-
-
+    private static void mostrarRecursosDisponibles() {
+        List<RecursoDigital> disponibles = GestorRecursos.listarDisponibles();
+        if (disponibles.isEmpty()) {
+            System.out.println("📭 No hay recursos disponibles.");
+        } else {
+            System.out.println("📚 Recursos disponibles:");
+            disponibles.forEach(r -> System.out.println(r.mostrar()));
+        }
+        System.out.println();
+    }
 }
