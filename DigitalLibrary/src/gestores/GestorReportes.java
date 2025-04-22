@@ -1,5 +1,6 @@
 package gestores;
 
+import enums.CategoriaRecurso;
 import modelos.Prestamo;
 import modelos.RecursoDigital;
 import usuario.Usuario;
@@ -63,6 +64,29 @@ public class GestorReportes {
         for (Map.Entry<Usuario, Long> entry : topUsuarios) {
             System.out.printf("%d. %s - %d préstamo(s)%n", posicion++, entry.getKey().getNombreCompleto(), entry.getValue());
         }
+
+        System.out.println();
+    }
+
+    public void mostrarEstadisticasPorCategoria() {
+        System.out.println("\n📈 Estadísticas de Uso por Categoría de Recurso\n");
+
+        List<Prestamo> prestamos = gestorPrestamo.listar();
+
+        if (prestamos.isEmpty()) {
+            System.out.println("⚠️ No hay préstamos registrados.");
+            return;
+        }
+
+        Map<CategoriaRecurso, Long> conteoPorCategoria = prestamos.stream()
+                .collect(Collectors.groupingBy(
+                        p -> p.getRecurso().getCategoria(),  // 👈 necesitas este método en RecursoDigital
+                        Collectors.counting()
+                ));
+
+        conteoPorCategoria.forEach((categoria, cantidad) ->
+                System.out.printf("📚 %s: %d préstamo(s)%n", categoria, cantidad)
+        );
 
         System.out.println();
     }

@@ -1,6 +1,7 @@
 package modelos;
 
 
+import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
 import interfaces.Notificable;
 import interfaces.Prestable;
@@ -153,6 +154,11 @@ public class Audiolibro extends RecursoDigital implements Prestable, Notificable
     @Override
     public String toString() {
         return mostrar();
+    }
+
+    @Override
+    public CategoriaRecurso getCategoria() {
+        return CategoriaRecurso.AUDIOLIBRO;
     }
 
 }

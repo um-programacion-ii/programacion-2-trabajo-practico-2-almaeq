@@ -376,11 +376,12 @@ public class CLI {
         int opcion;
         do {
             System.out.println("""
-        === SUBMENÚ DE REPORTES ===
-        1. Recursos más prestados
-        2. Usuarios más activos
-        3. Volver al menú principal
-        """);
+            === SUBMENÚ DE REPORTES ===
+            1. Recursos más prestados
+            2. Usuarios más activos
+            3. Estadísticas por Categoría
+            4. Volver al menú principal
+            """);
             try {
                 opcion = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
@@ -413,10 +414,11 @@ public class CLI {
                         System.out.println("❌ Número inválido.");
                     }
                 }
-                case 3 -> System.out.println("↩️ Volviendo al menú principal...");
+                case 3 -> gestorReportes.mostrarEstadisticasPorCategoria();
+                case 4 -> System.out.println("↩️ Volviendo al menú principal...");
                 default -> System.out.println("❌ Opción inválida.");
             }
-        } while (opcion != 3);
+        } while (opcion != 4);
     }
 
 

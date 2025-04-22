@@ -1,5 +1,6 @@
 package modelos;
 
+import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
 import interfaces.IRecursoDigital;
 import servicios.ServicioNotificaciones;
@@ -62,6 +63,8 @@ public abstract class RecursoDigital implements IRecursoDigital {
 
     public abstract void renovarSiEsPosible();
 
+    public abstract CategoriaRecurso getCategoria();
+
     public void configurarNotificaciones(ServicioNotificaciones servicio, String destinatario) {
     }
 
@@ -77,4 +80,5 @@ public abstract class RecursoDigital implements IRecursoDigital {
     }
 
     public abstract String mostrar();
+
 }
