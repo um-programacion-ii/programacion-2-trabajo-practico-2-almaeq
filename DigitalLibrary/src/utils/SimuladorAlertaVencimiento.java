@@ -13,6 +13,7 @@ import usuario.Usuario;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class SimuladorAlertaVencimiento {
 
@@ -30,7 +31,6 @@ public class SimuladorAlertaVencimiento {
         prestamosSimulados.add(new Prestamo(2, recurso2, usuario, LocalDate.now().minusDays(5), LocalDate.now(), EstadoPrestamo.PRESTADO, 0)); // Hoy
         prestamosSimulados.add(new Prestamo(3, recurso3, usuario, LocalDate.now().minusDays(10), LocalDate.now().minusDays(2), EstadoPrestamo.PRESTADO, 0)); // Ya vencido
 
-        // GestorPrestamo simulado solo para esta ejecución
         GestorPrestamo gestorPrestamoSimulado = new GestorPrestamo(null, null, null, null) {
             @Override
             public List<Prestamo> listar() {
@@ -45,8 +45,7 @@ public class SimuladorAlertaVencimiento {
             }
         };
 
-        AlertaVencimiento alerta = new AlertaVencimiento(gestorPrestamoSimulado, notificadorSimulado);
-        alerta.verificarYNotificarVencimientos();
+        AlertaVencimiento alerta = new AlertaVencimiento(gestorPrestamoSimulado, notificadorSimulado, new Scanner(System.in));        alerta.verificarYNotificarVencimientos();
     }
 
     private static RecursoDigital recursoSimulado(String titulo) {

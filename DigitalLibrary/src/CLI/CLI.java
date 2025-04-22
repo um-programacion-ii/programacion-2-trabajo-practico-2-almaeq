@@ -443,7 +443,7 @@ public class CLI {
 
             switch (opcion) {
                 case 1 -> {
-                    AlertaVencimiento alerta = new AlertaVencimiento(gestorPrestamo, gestorNotificaciones);
+                    AlertaVencimiento alerta = new AlertaVencimiento(gestorPrestamo, gestorNotificaciones, scanner);
                     alerta.verificarYNotificarVencimientos();
                 }
                 case 2 -> SimuladorAlertaVencimiento.ejecutar();
