@@ -376,17 +376,16 @@ public class CLI {
         int opcion;
         do {
             System.out.println("""
-            === SUBMENÚ DE REPORTES ===
-            1. Recursos más prestados
-            2. Volver al menú principal
-            """);
-
+        === SUBMENÚ DE REPORTES ===
+        1. Recursos más prestados
+        2. Usuarios más activos
+        3. Volver al menú principal
+        """);
             try {
                 opcion = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
                 opcion = -1;
             }
-
             switch (opcion) {
                 case 1 -> {
                     System.out.print("¿Cuántos recursos querés mostrar en el ranking? ");
@@ -401,12 +400,25 @@ public class CLI {
                         System.out.println("❌ Número inválido.");
                     }
                 }
-                case 2 -> System.out.println("↩️ Volviendo al menú principal...");
+                case 2 -> {
+                    System.out.print("¿Cuántos usuarios querés mostrar en el ranking? ");
+                    try {
+                        int top = Integer.parseInt(scanner.nextLine());
+                        if (top > 0) {
+                            gestorReportes.mostrarUsuariosMasActivos(top);
+                        } else {
+                            System.out.println("⚠️ Debe ser un número mayor a 0.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("❌ Número inválido.");
+                    }
+                }
+                case 3 -> System.out.println("↩️ Volviendo al menú principal...");
                 default -> System.out.println("❌ Opción inválida.");
             }
-
-        } while (opcion != 2);
+        } while (opcion != 3);
     }
+
 
 
 }

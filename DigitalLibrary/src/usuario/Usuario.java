@@ -45,6 +45,10 @@ public class Usuario {
         this.ID = ID;
     }
 
+    public String getNombreCompleto() {
+        return nombre + " " + apellido;
+    }
+
     @Override
     public String toString() {
         return "Usuario{" +
