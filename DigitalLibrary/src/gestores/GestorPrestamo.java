@@ -6,7 +6,6 @@ import excepciones.RecursoNoDisponibleExcepcion;
 import excepciones.UsuarioNoEncontradoExcepcion;
 import modelos.Prestamo;
 import modelos.RecursoDigital;
-import gestores.GestorNotificaciones;
 import usuario.Usuario;
 
 import java.time.LocalDate;
@@ -37,16 +36,21 @@ public class GestorPrestamo {
             Usuario usuario = seleccionarUsuario();
             RecursoDigital recurso = seleccionarRecursoDisponible();
 
+            System.out.print("Ingrese la fecha de devolución (YYYY-MM-DD): ");
+            LocalDate fechaDevolucion = LocalDate.parse(scanner.nextLine());
+
+            // 👉 Se intenta crear el préstamo primero
+            Prestamo nuevo = crearPrestamo(usuario, recurso, fechaDevolucion);
+
+            // 👉 Solo si fue exitoso, se notificará
             gestorNotificaciones.activarPara(usuario.getEmail());
             gestorNotificaciones.enviar(usuario.getEmail(), "📘 Se prestó el recurso: " + recurso.getTitulo());
 
-            Prestamo nuevo = crearPrestamo(usuario, recurso);
-
-            System.out.println("\u2705 Préstamo registrado con éxito:\n" + nuevo);
+            System.out.println("✅ Préstamo registrado con éxito:\n" + nuevo);
             return nuevo;
 
-        } catch (UsuarioNoEncontradoExcepcion | RecursoNoDisponibleExcepcion e) {
-            System.out.println("\u274C Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
             return null;
         }
     }
@@ -85,17 +89,24 @@ public class GestorPrestamo {
         return recurso;
     }
 
-    public synchronized Prestamo crearPrestamo(Usuario usuario, RecursoDigital recurso) throws RecursoNoDisponibleExcepcion {
+    public Prestamo crearPrestamo(Usuario usuario, RecursoDigital recurso, LocalDate fechaDevolucion) throws RecursoNoDisponibleExcepcion {
         if (!puedePrestarse(recurso)) {
             throw new RecursoNoDisponibleExcepcion("El recurso no puede ser prestado.");
         }
-        recurso.prestarSiEsPosible();
 
-        int id = generadorId.getAndIncrement();
-        Prestamo nuevo = new Prestamo(id, recurso, usuario, LocalDate.now(), null, EstadoPrestamo.PRESTADO, 0);
-        prestamos.add(nuevo);
-        recurso.actualizarEstado(EstadoRecurso.PRESTADO);
-        return nuevo;
+        recurso.prestarSiEsPosible(); // ← cambia el estado a PRESTADO
+
+        try {
+            int id = generadorId.getAndIncrement();
+            Prestamo nuevo = new Prestamo(id, recurso, usuario, LocalDate.now(), fechaDevolucion, EstadoPrestamo.PRESTADO, 0);
+            prestamos.add(nuevo);
+            recurso.actualizarEstado(EstadoRecurso.PRESTADO);
+            return nuevo;
+
+        } catch (Exception e) {
+            recurso.actualizarEstado(EstadoRecurso.DISPONIBLE); // ← revertimos si falló
+            throw e; // relanzamos la excepción para manejarla desde arriba
+        }
     }
 
     public synchronized void devolverPrestamo(Prestamo prestamo) {

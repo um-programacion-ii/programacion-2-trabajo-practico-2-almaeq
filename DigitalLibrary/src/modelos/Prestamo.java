@@ -20,8 +20,8 @@ public class Prestamo {
         this.id = id;
         this.recurso = recurso;
         this.usuario = usuario;
-        this.fechaPrestamo = fechaPrestamo;
-        this.fechaDevolucion = fechaDevolucion;
+        setFechaPrestamo(fechaPrestamo);
+        setFechaDevolucion(fechaDevolucion);
         this.estado = estado;
         this.renovaciones = renovaciones;
     }

@@ -5,7 +5,9 @@ import enums.EstadoRecurso;
 import gestores.*;
 import modelos.*;
 import usuario.Usuario;
+import utils.SimuladorAlertaVencimiento;
 import utils.SimuladorPrestamos;
+import alertas.AlertaVencimiento;
 
 import java.util.List;
 import java.util.Scanner;
@@ -19,6 +21,7 @@ public class CLI {
     private static final GestorReserva gestorReserva = new GestorReserva(gestorUsuario, gestorRecursos);
     private static final GestorPrestamo gestorPrestamo = new GestorPrestamo(gestorRecursos, gestorUsuario,gestorReserva,scanner);
     private static final GestorReportes gestorReportes = new GestorReportes(gestorPrestamo);
+    private static final GestorNotificaciones gestorNotificaciones = new GestorNotificaciones();
 
 
     public static void iniciar() {
@@ -38,28 +41,29 @@ public class CLI {
                 case 5 -> submenuPrestamos();
                 case 6 -> submenuReservas(gestorReserva);
                 case 7 -> submenuReportes(); // 👈 nuevo
-                case 8 -> System.out.println("Saliendo...");
+                case 8 -> submenuAlertas();
+                case 9 -> System.out.println("Saliendo...");
                 default -> System.out.println("❌ Opción inválida.\n");
             }
-        } while (opcion != 8);
+        } while (opcion != 9);
 
         gestorPrestamo.shutdown(); // ✅ cerramos al final del todo
     }
 
-
     private static void mostrarMenu() {
         System.out.println("""
-            === MENÚ PRINCIPAL ===
-            1. Crear Usuario
-            2. Buscar Usuario
-            3. Crear Recurso Digital
-            4. Buscar Recurso
-            5. Gestionar Prestamos
-            6. Gestionar Reservas
-            7. Reportes
-            8. Salir
-            Ingrese una opción:
-            """);
+        === MENÚ PRINCIPAL ===
+        1. Crear Usuario
+        2. Buscar Usuario
+        3. Crear Recurso Digital
+        4. Buscar Recurso
+        5. Gestionar Prestamos
+        6. Gestionar Reservas
+        7. Reportes
+        8. Verificar alertas
+        9. Salir
+        Ingrese una opción:
+        """);
     }
 
     private static void submenuBuscarUsuario() {
@@ -133,7 +137,7 @@ public class CLI {
             3. Renovar Préstamo
             4. Listar Préstamos
             5. Volver al Menú Principal
-            6. 🧪 Simular operaciones concurrentes
+            6. 🧪 Simular operaciones concurrentes (con datos propios y aislados)
         """);
 
             try {
@@ -167,7 +171,7 @@ public class CLI {
                 case 4 -> gestorPrestamo.mostrarTodos();
                 case 5 -> System.out.println("↩️ Volviendo al menú principal...\n");
                 default -> System.out.println("❌ Opción inválida.\n");
-                case 6 -> SimuladorPrestamos.ejecutar(gestorUsuario, gestorRecursos, gestorPrestamo);
+                case 6 -> SimuladorPrestamos.ejecutar();
                 }
             } while (opcion != 5);
     }
@@ -420,6 +424,36 @@ public class CLI {
             }
         } while (opcion != 4);
     }
+
+    private static void submenuAlertas() {
+        int opcion;
+        do {
+            System.out.println("""
+            === SUBMENÚ DE ALERTAS ===
+            1. Verificar vencimientos reales
+            2. Simular vencimientos (con datos propios y aislados)
+            3. Volver al menú principal
+        """);
+
+            try {
+                opcion = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                opcion = -1;
+            }
+
+            switch (opcion) {
+                case 1 -> {
+                    AlertaVencimiento alerta = new AlertaVencimiento(gestorPrestamo, gestorNotificaciones, scanner);
+                    alerta.verificarYNotificarVencimientos();
+                }
+                case 2 -> SimuladorAlertaVencimiento.ejecutar();
+                case 3 -> System.out.println("↩️ Volviendo al menú principal...\n");
+                default -> System.out.println("❌ Opción inválida.");
+            }
+
+        } while (opcion != 3);
+    }
+
 
 
 
