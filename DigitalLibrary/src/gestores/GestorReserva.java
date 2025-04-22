@@ -10,6 +10,7 @@ import modelos.Reserva;
 import gestores.GestorNotificaciones;
 import usuario.Usuario;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -201,14 +202,39 @@ public class GestorReserva {
                 .orElse(null);
     }
 
-    public void notificarPrimeraReservaDisponible(RecursoDigital recurso) {
+    public void notificarPrimeraReservaDisponible(RecursoDigital recurso, Scanner scanner, GestorPrestamo gestorPrestamo) {
         Reserva siguiente = getProximaReservaParaRecurso(recurso);
         if (siguiente != null) {
-            GestorNotificaciones gestorNotificaciones = new GestorNotificaciones();
-            gestorNotificaciones.activarPara(siguiente.getUsuario().getEmail());
-            recurso.configurarNotificaciones(gestorNotificaciones.getServicios(), siguiente.getUsuario().getEmail());
-            gestorNotificaciones.enviar(siguiente.getUsuario().getEmail(),
-                    "📢 El recurso '" + recurso.getTitulo() + "' está disponible para tu reserva.");
+            String email = siguiente.getUsuario().getEmail();
+            gestorNotificaciones.activarPara(email);
+            recurso.configurarNotificaciones(gestorNotificaciones.getServicios(), email);
+
+            gestorNotificaciones.enviar(email, "📢 El recurso '" + recurso.getTitulo() + "' está disponible para tu reserva.");
+
+            System.out.printf("👤 Usuario: %s (%s)\n", siguiente.getUsuario().getNombre(), email);
+            System.out.printf("¿Deseás tomar el recurso '%s' ahora mismo? (s/n): ", recurso.getTitulo());
+            String respuesta = scanner.nextLine().trim().toLowerCase();
+
+            if (respuesta.equals("s")) {
+                try {
+                    System.out.print("📅 Ingrese la fecha de devolución (YYYY-MM-DD): ");
+                    LocalDate fechaDevolucion = LocalDate.parse(scanner.nextLine());
+
+                    gestorPrestamo.crearPrestamo(siguiente.getUsuario(), recurso, fechaDevolucion);
+
+                    siguiente.setEstado(EstadoReserva.COMPLETADA);
+                    historialReservas.add(siguiente);
+                    colaReservas.remove(siguiente);
+
+                    System.out.println("✅ Préstamo inmediato realizado con éxito.");
+
+                } catch (Exception e) {
+                    System.out.println("❌ No se pudo realizar el préstamo inmediato: " + e.getMessage());
+                }
+            } else {
+                System.out.println("ℹ️ El préstamo no fue aceptado en este momento.");
+            }
         }
     }
+
 }

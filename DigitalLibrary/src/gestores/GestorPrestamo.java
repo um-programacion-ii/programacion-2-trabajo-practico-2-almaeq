@@ -115,11 +115,11 @@ public class GestorPrestamo {
         gestorNotificaciones.enviar(prestamo.getUsuario().getEmail(), "📘 Se devolvió el recurso: " + prestamo.getRecurso().getTitulo());
 
         prestamo.devolver();
-        prestamo.getRecurso().actualizarEstado(EstadoRecurso.DISPONIBLE);
+        prestamo.getRecurso().actualizarEstado(EstadoRecurso.DISPONIBLE); // ← actualizamos el estado del recurso
 
         System.out.println("🔁 El recurso '" + prestamo.getRecurso().getTitulo() + "' ha sido devuelto y está disponible para préstamo.");
 
-        new AlertaDisponibilidad(gestorReserva).notificarDisponibilidad(prestamo.getRecurso());
+        new AlertaDisponibilidad(gestorReserva).notificarDisponibilidad(prestamo.getRecurso(), scanner, this);
     }
 
     public synchronized boolean renovarPrestamo(int id) {

@@ -89,7 +89,7 @@ public class Prestamo {
     }
 
     public void devolver() {
-        this.estado = EstadoPrestamo.DISPONIBLE;
+        this.estado = EstadoPrestamo.TERMINADO;
         this.fechaDevolucion = LocalDate.now();
     }
 
