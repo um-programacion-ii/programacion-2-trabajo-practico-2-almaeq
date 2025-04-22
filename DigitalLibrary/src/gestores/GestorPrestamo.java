@@ -1,5 +1,6 @@
 package gestores;
 
+import alertas.AlertaDisponibilidad;
 import enums.EstadoRecurso;
 import enums.EstadoPrestamo;
 import excepciones.RecursoNoDisponibleExcepcion;
@@ -118,7 +119,7 @@ public class GestorPrestamo {
 
         System.out.println("🔁 El recurso '" + prestamo.getRecurso().getTitulo() + "' ha sido devuelto y está disponible para préstamo.");
 
-        gestorReserva.notificarPrimeraReservaDisponible(prestamo.getRecurso());
+        new AlertaDisponibilidad(gestorReserva).notificarDisponibilidad(prestamo.getRecurso());
     }
 
     public synchronized boolean renovarPrestamo(int id) {

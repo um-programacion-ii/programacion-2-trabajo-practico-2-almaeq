@@ -4,7 +4,9 @@ import servicios.ServicioNotificaciones;
 import servicios.ServicioNotificacionesEmail;
 import servicios.ServicioNotificacionesSMS;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,13 +29,19 @@ public class GestorNotificaciones {
     }
 
     public void enviar(String destinatario, String mensaje) {
+        List<Callable<Void>> tareas = new ArrayList<>();
         for (ServicioNotificaciones servicio : servicios) {
-            executorService.submit(() -> {
-                if (servicio.estaActivo(destinatario)) {
-                    String tipo = servicio.getClass().getSimpleName(); // Ej: ServicioNotificacionesEmail
+            if (servicio.estaActivo(destinatario)) {
+                tareas.add(() -> {
                     servicio.enviarNotificacion(destinatario, mensaje);
-                }
-            });
+                    return null;
+                });
+            }
+        }
+        try {
+            executorService.invokeAll(tareas); // Espera a que terminen todas
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
