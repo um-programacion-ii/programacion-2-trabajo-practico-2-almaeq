@@ -20,7 +20,7 @@ import java.util.Scanner;
 public class SimuladorRecordatorios {
 
     public static void ejecutar() {
-        System.out.println("🧪 Simulando recordatorios de vencimiento... (modo aislado)");
+        System.out.println("\uD83E\uDDEA Simulando recordatorios de vencimiento... (modo aislado)");
 
         // Mostrar hora de ejecución
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

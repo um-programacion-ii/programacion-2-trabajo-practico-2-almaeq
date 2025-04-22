@@ -1,5 +1,6 @@
 package alertas;
 
+import enums.NivelUrgencia;
 import gestores.GestorNotificaciones;
 import gestores.GestorPrestamo;
 import modelos.Prestamo;
@@ -32,20 +33,35 @@ public class RecordatorioPeriodico implements Runnable {
 
             if (fechaDevolucion != null) {
                 long diasRestantes = hoy.until(fechaDevolucion).getDays();
-                String mensaje = null;
 
-                if (diasRestantes == 1) {
-                    mensaje = "⏰ Recordatorio: tu préstamo del recurso '" + prestamo.getRecurso().getTitulo() + "' vence mañana.";
-                } else if (diasRestantes == 0) {
-                    mensaje = "⚠️ Hoy vence tu préstamo del recurso '" + prestamo.getRecurso().getTitulo() + "'.";
-                } else if (diasRestantes < 0) {
-                    mensaje = "❗ Tu préstamo del recurso '" + prestamo.getRecurso().getTitulo() + "' venció hace " + Math.abs(diasRestantes) + " días.";
-                }
+                NivelUrgencia urgencia = determinarUrgencia(diasRestantes);
+                String mensaje = construirMensaje(prestamo, diasRestantes, urgencia);
 
-                if (mensaje != null) {
-                    gestorNotificaciones.enviar(usuario.getEmail(), mensaje);
+                if (mensaje != null && urgencia != null) {
+                    String mensajeConSimbolo = urgencia.getSimbolo() + " " + mensaje;
+                    System.out.println(mensajeConSimbolo);
+                    gestorNotificaciones.enviar(usuario.getEmail(), mensajeConSimbolo);
                 }
             }
         }
+    }
+
+    private NivelUrgencia determinarUrgencia(long diasRestantes) {
+        if (diasRestantes == 1) return NivelUrgencia.WARNING;
+        if (diasRestantes == 0) return NivelUrgencia.WARNING;
+        if (diasRestantes < 0) return NivelUrgencia.ERROR;
+        return NivelUrgencia.INFO;
+    }
+
+    private String construirMensaje(Prestamo prestamo, long diasRestantes, NivelUrgencia urgencia) {
+        String titulo = prestamo.getRecurso().getTitulo();
+
+        return switch (urgencia) {
+            case WARNING -> (diasRestantes == 1)
+                    ? "Recordatorio: tu préstamo del recurso '" + titulo + "' vence mañana."
+                    : "Hoy vence tu préstamo del recurso '" + titulo + "'.";
+            case ERROR -> "Tu préstamo del recurso '" + titulo + "' venció hace " + Math.abs(diasRestantes) + " día(s).";
+            case INFO -> "Tu préstamo del recurso '" + titulo + "' sigue activo.";
+        };
     }
 }
