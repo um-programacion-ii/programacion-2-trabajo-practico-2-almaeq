@@ -20,8 +20,8 @@ public class Prestamo {
         this.id = id;
         this.recurso = recurso;
         this.usuario = usuario;
-        setFechaPrestamo(fechaPrestamo); // ✅ ya tenías esto bien
-        setFechaDevolucion(fechaDevolucion); // ✅ usamos el setter para validar
+        setFechaPrestamo(fechaPrestamo);
+        setFechaDevolucion(fechaDevolucion);
         this.estado = estado;
         this.renovaciones = renovaciones;
     }
