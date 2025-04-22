@@ -1,5 +1,6 @@
 package CLI;
 
+import alertas.RecordatorioPeriodico;
 import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
 import gestores.*;
@@ -8,9 +9,13 @@ import usuario.Usuario;
 import utils.SimuladorAlertaVencimiento;
 import utils.SimuladorPrestamos;
 import alertas.AlertaVencimiento;
+import utils.SimuladorRecordatorios;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 public class CLI {
@@ -22,8 +27,12 @@ public class CLI {
     private static final GestorPrestamo gestorPrestamo = new GestorPrestamo(gestorRecursos, gestorUsuario,gestorReserva,scanner);
     private static final GestorReportes gestorReportes = new GestorReportes(gestorPrestamo);
     private static final GestorNotificaciones gestorNotificaciones = new GestorNotificaciones();
+    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static void iniciar() {
+        // ⏰ Arranca el sistema de recordatorios cada 24h
+        RecordatorioPeriodico recordatorio = new RecordatorioPeriodico(gestorPrestamo, gestorNotificaciones);
+        scheduler.scheduleAtFixedRate(recordatorio, 0, 1, TimeUnit.DAYS);
         int opcion;
         do {
             mostrarMenu();
@@ -432,7 +441,8 @@ public class CLI {
             === SUBMENÚ DE ALERTAS ===
             1. Verificar vencimientos reales
             2. Simular vencimientos (con datos propios y aislados)
-            3. Volver al menú principal
+            3. Simular recordatorios periódicos (modo aislado)
+            4. Volver al menú principal
         """);
 
             try {
@@ -447,11 +457,12 @@ public class CLI {
                     alerta.verificarYNotificarVencimientos();
                 }
                 case 2 -> SimuladorAlertaVencimiento.ejecutar();
-                case 3 -> System.out.println("↩️ Volviendo al menú principal...\n");
+                case 3 -> SimuladorRecordatorios.ejecutar();
+                case 4 -> System.out.println("↩️ Volviendo al menú principal...\n");
                 default -> System.out.println("❌ Opción inválida.");
             }
 
-        } while (opcion != 3);
+        } while (opcion != 4 );
     }
 
     private static void mostrarRecursosDisponibles() {
