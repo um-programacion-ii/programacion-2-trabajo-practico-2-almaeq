@@ -1,7 +1,9 @@
 package gestores;
 
+import enums.CategoriaRecurso;
 import modelos.Prestamo;
 import modelos.RecursoDigital;
+import usuario.Usuario;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,4 +42,52 @@ public class GestorReportes {
         System.out.println();
     }
 
+    public void mostrarUsuariosMasActivos(int top) {
+        System.out.println("\n👤 Reporte: Usuarios más activos\n");
+
+        List<Prestamo> prestamos = gestorPrestamo.listar();
+
+        if (prestamos.isEmpty()) {
+            System.out.println("⚠️ No hay préstamos registrados.");
+            return;
+        }
+
+        Map<Usuario, Long> conteo = prestamos.stream()
+                .collect(Collectors.groupingBy(Prestamo::getUsuario, Collectors.counting()));
+
+        List<Map.Entry<Usuario, Long>> topUsuarios = conteo.entrySet().stream()
+                .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
+                .limit(top)
+                .toList();
+
+        int posicion = 1;
+        for (Map.Entry<Usuario, Long> entry : topUsuarios) {
+            System.out.printf("%d. %s - %d préstamo(s)%n", posicion++, entry.getKey().getNombreCompleto(), entry.getValue());
+        }
+
+        System.out.println();
+    }
+
+    public void mostrarEstadisticasPorCategoria() {
+        System.out.println("\n📈 Estadísticas de Uso por Categoría de Recurso\n");
+
+        List<Prestamo> prestamos = gestorPrestamo.listar();
+
+        if (prestamos.isEmpty()) {
+            System.out.println("⚠️ No hay préstamos registrados.");
+            return;
+        }
+
+        Map<CategoriaRecurso, Long> conteoPorCategoria = prestamos.stream()
+                .collect(Collectors.groupingBy(
+                        p -> p.getRecurso().getCategoria(),  // 👈 necesitas este método en RecursoDigital
+                        Collectors.counting()
+                ));
+
+        conteoPorCategoria.forEach((categoria, cantidad) ->
+                System.out.printf("📚 %s: %d préstamo(s)%n", categoria, cantidad)
+        );
+
+        System.out.println();
+    }
 }

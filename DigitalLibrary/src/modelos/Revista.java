@@ -1,5 +1,6 @@
 package modelos;
 
+import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
 import interfaces.Notificable;
 import interfaces.Renovable;
@@ -165,7 +166,12 @@ public class Revista extends RecursoDigital implements Renovable, Prestable, Not
 
     @Override
     public String toString() {
-        return mostrar(); // o directamente implementá el texto acá si querés
+        return mostrar();
+    }
+
+    @Override
+    public CategoriaRecurso getCategoria() {
+        return CategoriaRecurso.REVISTA;
     }
 
 
