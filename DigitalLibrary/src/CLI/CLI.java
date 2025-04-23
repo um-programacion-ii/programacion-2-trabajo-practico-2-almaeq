@@ -60,7 +60,9 @@ public class CLI {
             }
         } while (opcion != 11);
 
-        gestorPrestamo.shutdown(); // ✅ cerramos al final del todo
+        gestorPrestamo.shutdown();          // ✅ Cierra el sistema de notificaciones de préstamos
+        gestorReportes.shutdown();          // ✅ Cierra el executor de reportes
+        scheduler.shutdown();               // ✅ Cierra el scheduler de recordatorios periódicos
     }
 
     private static void mostrarMenu() {
