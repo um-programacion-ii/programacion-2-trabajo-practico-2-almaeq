@@ -41,6 +41,7 @@ public class RecordatorioPeriodico implements Runnable {
                     String mensajeConSimbolo = urgencia.getSimbolo() + " " + mensaje;
                     System.out.println(mensajeConSimbolo);
                     gestorNotificaciones.enviar(usuario.getEmail(), mensajeConSimbolo);
+                    HistorialAlertas.registrar(mensaje);
                 }
             }
         }
@@ -60,8 +61,10 @@ public class RecordatorioPeriodico implements Runnable {
             case WARNING -> (diasRestantes == 1)
                     ? "Recordatorio: tu préstamo del recurso '" + titulo + "' vence mañana."
                     : "Hoy vence tu préstamo del recurso '" + titulo + "'.";
-            case ERROR -> "Tu préstamo del recurso '" + titulo + "' venció hace " + Math.abs(diasRestantes) + " día(s).";
+            case ERROR ->
+                    "Tu préstamo del recurso '" + titulo + "' venció hace " + Math.abs(diasRestantes) + " día(s).";
             case INFO -> "Tu préstamo del recurso '" + titulo + "' sigue activo.";
         };
     }
+
 }

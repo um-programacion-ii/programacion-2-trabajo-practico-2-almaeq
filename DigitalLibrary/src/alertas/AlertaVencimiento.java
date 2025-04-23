@@ -47,6 +47,7 @@ public class AlertaVencimiento {
                     String mensajeConSimbolo = nivel.getSimbolo() + " " + mensaje;
                     System.out.println(mensajeConSimbolo);
                     gestorNotificaciones.enviar(usuario.getEmail(), mensajeConSimbolo);
+                    HistorialAlertas.registrar(mensaje);
                     huboAlertas = true;
 
                     if ((diasRestantes == 0 || diasRestantes == 1) && prestamo.puedeRenovarse()) {

@@ -1,5 +1,6 @@
 package CLI;
 
+import alertas.HistorialAlertas;
 import alertas.RecordatorioPeriodico;
 import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
@@ -50,7 +51,8 @@ public class CLI {
                 case 6 -> submenuReservas(gestorReserva);
                 case 7 -> submenuReportes(); // 👈 nuevo
                 case 8 -> submenuAlertas();
-                case 9 -> System.out.println("Saliendo...");
+                case 9 -> HistorialAlertas.mostrarHistorial();
+                case 10 -> System.out.println("Saliendo...");
                 default -> System.out.println("❌ Opción inválida.\n");
             }
         } while (opcion != 9);
@@ -69,7 +71,8 @@ public class CLI {
         6. Gestionar Reservas
         7. Reportes
         8. Verificar alertas
-        9. Salir
+        9. Mostrar historial de alertas
+        10. Salir
         Ingrese una opción:
         """);
     }
