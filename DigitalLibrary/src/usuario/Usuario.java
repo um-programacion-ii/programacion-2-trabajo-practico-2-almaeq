@@ -3,19 +3,26 @@ package usuario;
 import enums.CanalNotificacion;
 
 import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Usuario {
+    private static final AtomicInteger idGenerator = new AtomicInteger(1); // 👈 ID incremental automático
+
+    private final int ID;
     private String nombre;
     private String apellido;
     private String email;
-    private int ID;
     private EnumSet<CanalNotificacion> canalesPreferidos = EnumSet.of(CanalNotificacion.EMAIL); // Por defecto email
 
-    public Usuario(String nombre, String apellido, String email, int ID) {
+    public Usuario(String nombre, String apellido, String email) {
+        this.ID = idGenerator.getAndIncrement();
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
-        this.ID = ID;
+    }
+
+    public int getID() {
+        return ID;
     }
 
     public String getNombre() {
@@ -42,12 +49,6 @@ public class Usuario {
         this.email = email;
     }
 
-    public int getID() { return ID; }
-
-    public void setID(int ID) {
-        this.ID = ID;
-    }
-
     public EnumSet<CanalNotificacion> getCanalesPreferidos() {
         return canalesPreferidos;
     }
@@ -63,11 +64,10 @@ public class Usuario {
     @Override
     public String toString() {
         return "Usuario{" +
-                "nombre='" + nombre + '\'' +
+                "ID=" + ID +
+                ", nombre='" + nombre + '\'' +
                 ", apellido='" + apellido + '\'' +
                 ", email='" + email + '\'' +
-                ", ID=" + ID +
                 '}';
     }
-
 }

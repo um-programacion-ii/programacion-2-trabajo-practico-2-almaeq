@@ -127,18 +127,41 @@ public class GestorPrestamo {
         if (p != null && p.estaActivo()) {
             RecursoDigital recurso = p.getRecurso();
             gestorNotificaciones.activarPara(p.getUsuario().getEmail());
-            gestorNotificaciones.enviar(p.getUsuario().getEmail(), "🔁 Se renovó el recurso: " + recurso.getTitulo(), p.getUsuario().getCanalesPreferidos());
 
             if (recurso.esRenovable() && p.puedeRenovarse()) {
-                p.renovar();
-                recurso.renovarSiEsPosible();
-                return true;
+                try {
+                    System.out.print("📅 Ingrese la nueva fecha de devolución (YYYY-MM-DD): ");
+                    LocalDate nuevaFecha = LocalDate.parse(scanner.nextLine());
+
+                    // Validación: que la fecha nueva no sea anterior a hoy
+                    if (nuevaFecha.isBefore(LocalDate.now())) {
+                        System.out.println("❌ La nueva fecha de devolución no puede ser anterior a hoy.");
+                        return false;
+                    }
+
+                    p.renovar();
+                    p.setFechaDevolucion(nuevaFecha);
+                    recurso.renovarSiEsPosible();
+
+                    gestorNotificaciones.enviar(p.getUsuario().getEmail(),
+                            "🔁 Se renovó el recurso: " + recurso.getTitulo() + ". Nueva devolución: " + nuevaFecha,
+                            p.getUsuario().getCanalesPreferidos());
+
+                    return true;
+
+                } catch (Exception e) {
+                    System.out.println("❌ Error al renovar el préstamo: " + e.getMessage());
+                }
             } else {
-                recurso.renovarSiEsPosible();
+                System.out.println("⚠️ El recurso no puede renovarse en este momento.");
             }
+        } else {
+            System.out.println("❌ Préstamo no encontrado o ya no está activo.");
         }
+
         return false;
     }
+
 
     public List<Prestamo> listar() {
         return prestamos;
