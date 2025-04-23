@@ -1,3 +1,4 @@
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/tc38IXJF)
 # 📚 Trabajo Práctico: Sistema de Gestión de Biblioteca Digital (Java 21+)
 
 ## 📌 Objetivo General
@@ -5,7 +6,359 @@
 Desarrollar un sistema de gestión de biblioteca digital que implemente los cinco principios SOLID, programación orientada a objetos, y conceptos avanzados de Java. El sistema deberá manejar diferentes tipos de recursos digitales, préstamos, reservas, y notificaciones en tiempo real.
 
 ## 👨‍🎓 Información del Alumno
-- **Nombre y Apellido**: [Nombre y Apellido del Alumno]
+- **Nombre y Apellido**: Alma Quinteros
+---
+# 📚 Sistema de Gestión de Recursos Digitales
+
+Este sistema permite gestionar usuarios, recursos digitales, préstamos y reservas en una biblioteca digital. Implementa funcionalidades como renovaciones, alertas de vencimiento, recordatorios automáticos, notificaciones personalizadas y generación de reportes en segundo plano.
+
+---
+
+## 🚀 Cómo funciona el sistema
+
+### 🧱 Arquitectura General
+
+El sistema se basa en una arquitectura modular orientada a objetos. Cada componente tiene responsabilidades claras:
+
+- **Usuario**: representa a la persona que utiliza el sistema.
+- **RecursoDigital**: representa un recurso como libro, revista o audiolibro.
+- **Prestamo**: gestiona el ciclo de vida de un recurso prestado.
+- **Reserva**: permite reservar recursos no disponibles.
+- **Gestores**: encapsulan la lógica de negocio (usuarios, recursos, préstamos, reservas, reportes, notificaciones).
+- **Alertas y Recordatorios**: notifican vencimientos y disponibilidades.
+- **CLI**: interfaz de línea de comandos interactiva.
+
+## 📦 Organización del proyecto
+
+```
+src/
+├── alertas/
+├── gestores/
+├── modelos/
+├── utils/
+└── CLI/
+```
+
+📁 src
+ ┣ 📁 modelos
+ ┃ ┣ 📄 Usuario.java              → Representa a un usuario del sistema
+ ┃ ┣ 📄 RecursoDigital.java       → Clase abstracta base para recursos
+ ┃ ┣ 📄 Libro.java                → Recurso de tipo libro
+ ┃ ┣ 📄 Revista.java              → Recurso de tipo revista
+ ┃ ┣ 📄 Audiolibro.java           → Recurso de tipo audiolibro
+ ┃ ┣ 📄 Prestamo.java             → Registro de préstamos con su estado
+ ┃ ┣ 📄 Reserva.java              → Registro de reservas en cola
+ ┃ ┗ 📄 EstadoRecurso.java        → Enum de estados posibles de recursos
+
+ ┣ 📁 gestores
+ ┃ ┣ 📄 GestorUsuario.java        → Controla creación y búsqueda de usuarios
+ ┃ ┣ 📄 GestorRecursos.java       → Controla la administración de recursos
+ ┃ ┣ 📄 GestorPrestamo.java       → Maneja préstamos y devoluciones
+ ┃ ┣ 📄 GestorReserva.java        → Administra la cola de reservas y prioridades
+ ┃ ┣ 📄 GestorNotificaciones.java → Envia notificaciones (email, SMS)
+ ┃ ┗ 📄 GestorReportes.java       → Genera reportes estadísticos del sistema
+
+ ┣ 📁 alertas
+ ┃ ┣ 📄 AlertaVencimiento.java    → Verifica vencimientos y permite renovaciones
+ ┃ ┣ 📄 AlertaDisponibilidad.java → Notifica disponibilidad de recursos reservados
+ ┃ ┣ 📄 RecordatorioPeriodico.java→ Runnable que envía recordatorios automáticos
+ ┃ ┗ 📄 HistorialAlertas.java     → Almacena y muestra las alertas generadas
+
+ ┣ 📁 servicios
+ ┃ ┣ 📄 ServicioNotificaciones.java        → Interfaz base
+ ┃ ┣ 📄 ServicioNotificacionesEmail.java   → Notificador vía email
+ ┃ ┗ 📄 ServicioNotificacionesSMS.java     → Notificador vía SMS
+
+ ┣ 📁 utils
+ ┃ ┣ 📄 SimuladorPrestamos.java            → Simulación de múltiples préstamos concurrentes
+ ┃ ┣ 📄 SimuladorAlertaVencimiento.java    → Simula alertas en modo aislado
+ ┃ ┗ 📄 SimuladorRecordatorios.java        → Simula recordatorios periódicos
+
+ ┣ 📁 enums
+ ┃ ┣ 📄 EstadoPrestamo.java     → Enum para estado del préstamo
+ ┃ ┣ 📄 EstadoReserva.java      → Enum para estado de la reserva
+ ┃ ┣ 📄 CanalNotificacion.java  → Enum para preferencias (EMAIL, SMS)
+ ┃ ┣ 📄 PrioridadReserva.java   → Enum de prioridades (ALTA, MEDIA, BAJA)
+ ┃ ┗ 📄 NivelUrgencia.java      → Enum para clasificar severidad de alertas
+
+ ┣ 📁 interfaces
+ ┃ ┣ 📄 Prestable.java          → Interfaz para recursos que pueden prestarse
+ ┃ ┣ 📄 Renovable.java          → Interfaz para recursos renovables
+ ┃ ┗ 📄 Notificable.java        → Interfaz para recursos con notificación
+
+ ┗ 📄 CLI.java                  → Interfaz de consola principal (menú interactivo)
+
+---
+
+### 🔄 Flujo de trabajo
+
+1. El usuario se registra y crea recursos digitales.
+2. Puede prestar un recurso, devolverlo o renovarlo si es renovable.
+3. Si un recurso no está disponible, el usuario puede reservarlo.
+4. Al devolverse un recurso, se notifica al siguiente en la cola de reserva.
+5. Alertas y recordatorios se ejecutan automáticamente o se simulan.
+6. Se generan reportes asincrónicamente para evaluar el uso del sistema.
+
+---
+
+## 🛠️ Cómo ponerlo en funcionamiento
+
+### ✅ Requisitos previos
+
+- Java 17 o superior
+- IDE como IntelliJ IDEA o Eclipse
+- Maven o Gradle (opcional)
+- Terminal (CLI) con soporte para entrada y salida
+
+### 🧪 Compilación
+
+Si estás en un entorno con `javac`:
+```bash
+javac */*.java Main.java
+```
+
+### ▶️ Ejecución
+
+Desde tu IDE, ejecutar la clase principal:
+
+```java
+CLI.CLI.main(String[] args)
+```
+
+O desde terminal:
+```bash
+java Main  
+```
+
+---
+
+## 🧪 Cómo probar cada aspecto desarrollado
+
+### 1. 👤 Gestión de Usuarios
+- Crear usuarios desde el menú principal.
+- Buscar por nombre, fragmento o apellido.
+- Cambiar preferencias de notificación (email, SMS, ambos).
+
+### 2. 📚 Gestión de Recursos
+- Crear libros, revistas y audiolibros.
+- Buscar por título, estado, categoría o palabra clave.
+
+### 3. 🔄 Gestión de Préstamos
+- Registrar un préstamo con fecha de devolución.
+- Devolver el recurso y ver si se notifica al siguiente usuario.
+- Renovar préstamo (se permite ingresar nueva fecha).
+- Ver lista de todos los préstamos registrados.
+
+### 4. 📅 Gestión de Reservas
+- Reservar recurso si no está disponible.
+- Cancelar o completar reservas.
+- Simular disponibilidad inmediata desde la notificación.
+
+### 5. 🛎️ Alertas y Recordatorios
+- Simular alertas de vencimiento y renovar desde consola.
+- Ejecutar recordatorios automáticos cada 24h (por `ScheduledExecutorService`).
+- Historial de alertas visible desde consola.
+
+### 6. ⚙️ Notificaciones y Preferencias
+- Las notificaciones se envían solo si el canal está activado.
+- Se utiliza un `ExecutorService` para simular envío asíncrono.
+- Soporte para `EMAIL` y `SMS`.
+
+### 7. 📈 Reportes Asíncronos
+- Recursos más prestados
+- Usuarios más activos
+- Uso por categoría
+- Los reportes se generan en segundo plano, mostrando progreso en consola.
+
+---
+
+## ✅ Ejemplos prácticos
+
+- **Renovación desde alerta**:
+  ```
+  ⚠ [HOY] El préstamo del recurso 'Recurso 1' vence hoy.
+  🔁 ¿Deseás renovar el préstamo #1? (s/n): s
+  📅 Ingresá la nueva fecha de devolución (YYYY-MM-DD): 2025-04-26
+  ✅ Préstamo renovado correctamente.
+  ```
+
+- **Notificación inmediata**:
+  ```
+  📧 Email a usuario@example.com: 📘 Se devolvió el recurso: Python Avanzado
+  📢 El recurso 'Python Avanzado' está disponible para tu reserva.
+  👤 Juan, ¿deseás tomar el recurso ahora? (s/n): s
+  ```
+
+- **Simulador de recordatorios**:
+  ```
+  🧪 Simulando recordatorios de vencimiento... (modo aislado)
+  🕒 Hora de ejecución: 2025-04-22 20:45:01
+  📢 Alerta a usuario1@example.com: ⚠️ Hoy vence tu préstamo del recurso 'Libro 2'.
+  ```
+
+---
+
+## 🧪 Simuladores del Sistema
+
+El sistema incluye una serie de simuladores que permiten probar de forma aislada y controlada algunas de las funcionalidades más relevantes del sistema. Están diseñados para **evaluar el comportamiento sin afectar los datos reales**.
+
+### 📂 Ubicación
+
+Todos los simuladores se encuentran en el paquete:
+
+```plaintext
+src/utils/
+```
+
+### 🔧 Acceso desde la Consola (CLI)
+
+Podés ejecutar los simuladores desde el menú principal del sistema:
+
+```
+8. Verificar alertas
+  ├─ 2. Simular vencimientos (con datos propios y aislados)
+  └─ 3. Simular recordatorios periódicos (modo aislado)
+
+5. Gestionar préstamos
+  └─ 6. Simular operaciones concurrentes (con datos propios y aislados)
+```
+
+### 📄 Descripción de los Simuladores
+
+#### ✅ SimuladorPrestamos.java
+- **Propósito**: Simula múltiples usuarios intentando tomar prestado el mismo recurso al mismo tiempo.
+- **Objetivo**: Verificar la correcta sincronización del sistema y prevenir condiciones de carrera.
+- **Resultado esperado**: Solo un usuario logra tomar el préstamo, los demás reciben un mensaje de recurso no disponible.
+
+---
+
+#### 📅 SimuladorAlertaVencimiento.java
+- **Propósito**: Simula tres escenarios diferentes de vencimiento de préstamos:
+  - Un préstamo que vence mañana
+  - Un préstamo que vence hoy
+  - Un préstamo que ya está vencido
+- **Objetivo**: Probar el sistema de alertas de vencimiento y permitir renovaciones inmediatas.
+- **Resultado esperado**: Se imprime una alerta con el nivel de urgencia correspondiente y se ofrece renovar el préstamo.
+
+---
+
+#### 🔁 SimuladorRecordatorios.java
+- **Propósito**: Ejecuta un ciclo completo de recordatorios como lo haría el sistema en segundo plano.
+- **Objetivo**: Verificar que se envían mensajes correctamente con base en la fecha de devolución.
+- **Resultado esperado**: Aparecen mensajes `ℹ`, `⚠` o `❗` dependiendo de cuántos días falten o hayan pasado del vencimiento.
+
+
+## Esto permite probar funcionalidades críticas sin necesidad de modificar los datos reales ni interactuar con un flujo completo del sistema.
+---
+
+# 🧪 Pruebas por Módulo
+
+Este documento detalla cómo probar cada aspecto del sistema utilizando la interfaz de consola.
+
+---
+
+## 👤 Gestión de Usuarios (Menú: 1)
+
+### ➕ Añadir Usuarios
+1. Seleccionar la opción `1. Crear Usuario`.
+2. Ingresar los datos solicitados: nombre, apellido y correo electrónico.
+3. Verificar el mensaje de confirmación: `✅ Usuario creado con éxito`.
+
+### 🔍 Buscar Usuarios (Menú: 2)
+- **Listar todos**: opción `1` muestra todos los usuarios registrados.
+- **Buscar por nombre exacto**: opción `2`, ingresar nombre completo.
+- **Buscar por fragmento**: opción `3`, ingresar parte del nombre o apellido.
+- **Ordenar por apellido o nombre**: opciones `4` y `5`.
+
+---
+
+## 📚 Gestión de Recursos Digitales (Menú: 3 y 4)
+
+### ➕ Crear Recursos
+1. Seleccionar `3. Crear Recurso Digital`.
+2. Elegir la categoría (Libro, Revista, etc).
+3. Ingresar título y atributos requeridos.
+4. Confirmar con `✅ Recurso agregado con éxito`.
+
+### 🔍 Buscar Recursos (Menú: 4)
+- Búsquedas por título exacto o fragmento.
+- Filtros por categoría, estado o renovabilidad.
+
+---
+
+## 🔄 Gestión de Préstamos (Menú: 5)
+
+### ➕ Registrar Préstamo
+1. Opción `1. Registrar Préstamo`.
+2. Seleccionar usuario y recurso disponible.
+3. Ingresar fecha de devolución.
+4. Confirmar el mensaje de éxito.
+
+### 🔁 Renovar Préstamo
+- Opción `3. Renovar Préstamo`.
+- Ingresar ID del préstamo.
+- Ingresar nueva fecha de devolución si corresponde.
+
+### ↩️ Devolver Préstamo
+- Opción `2. Devolver Préstamo`.
+- Ingresar ID del préstamo.
+- Se actualiza el estado y puede activar notificación de reserva.
+
+### 📋 Listar Préstamos
+- Opción `4`, muestra todos los préstamos y su estado.
+
+---
+
+## 📅 Gestión de Reservas (Menú: 6)
+
+- **Registrar reserva**: se valida si el recurso está prestado.
+- **Cancelar o completar** reservas desde su respectiva opción.
+- **Mostrar próxima reserva** y ver prioridades dinámicas.
+
+---
+
+## 📢 Alertas y Recordatorios (Menú: 8)
+
+### 📆 Verificar Vencimientos
+- Opción `1`, verifica y pregunta si desea renovar.
+- Aplica lógica de urgencia (⚠️ Hoy, ℹ Mañana, ❗ Vencido).
+
+### 🧪 Simular Vencimientos
+- Opción `2`, ejecuta una simulación con datos ficticios.
+
+### 🧪 Simular Recordatorios
+- Opción `3`, simula recordatorios periódicos para usuarios ficticios.
+
+---
+
+## 📈 Reportes (Menú: 7)
+
+- Generación en segundo plano (asincrónica).
+- Recursos más prestados, usuarios más activos, estadísticas por categoría.
+
+---
+
+## ⚙️ Configuración de Preferencias (Desde gestión de usuarios)
+- Al seleccionar un usuario por ID, se puede configurar:
+  - 📧 Email
+  - 📱 SMS
+  - Ambos
+- Se aplican a futuras notificaciones.
+
+---
+
+## 🗃️ Historial de Alertas
+- Se mantiene un registro visible desde consola.
+- Ayuda a auditar vencimientos y recordatorios previos.
+
+## 🧼 Mantenimiento y mejoras
+
+- [x] ExecutorService usado para tareas asincrónicas
+- [x] Uso de `synchronized` para evitar problemas de concurrencia
+- [x] Modularidad en clases y responsabilidades
+- [x] Pruebas en consola para cada funcionalidad
+
+---
 
 ## 📋 Requisitos Adicionales
 
