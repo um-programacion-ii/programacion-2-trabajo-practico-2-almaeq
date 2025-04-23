@@ -45,7 +45,7 @@ public class GestorPrestamo {
 
             // 👉 Solo si fue exitoso, se notificará
             gestorNotificaciones.activarPara(usuario.getEmail());
-            gestorNotificaciones.enviar(usuario.getEmail(), "📘 Se prestó el recurso: " + recurso.getTitulo());
+            gestorNotificaciones.enviar(usuario.getEmail(), "📘 Se prestó el recurso: " + recurso.getTitulo(), usuario.getCanalesPreferidos());
 
             System.out.println("✅ Préstamo registrado con éxito:\n" + nuevo);
             return nuevo;
@@ -112,7 +112,7 @@ public class GestorPrestamo {
 
     public synchronized void devolverPrestamo(Prestamo prestamo) {
         gestorNotificaciones.activarPara(prestamo.getUsuario().getEmail());
-        gestorNotificaciones.enviar(prestamo.getUsuario().getEmail(), "📘 Se devolvió el recurso: " + prestamo.getRecurso().getTitulo());
+        gestorNotificaciones.enviar(prestamo.getUsuario().getEmail(), "📘 Se devolvió el recurso: " + prestamo.getRecurso().getTitulo(), prestamo.getUsuario().getCanalesPreferidos());
 
         prestamo.devolver();
         prestamo.getRecurso().actualizarEstado(EstadoRecurso.DISPONIBLE); // ← actualizamos el estado del recurso
@@ -127,7 +127,7 @@ public class GestorPrestamo {
         if (p != null && p.estaActivo()) {
             RecursoDigital recurso = p.getRecurso();
             gestorNotificaciones.activarPara(p.getUsuario().getEmail());
-            gestorNotificaciones.enviar(p.getUsuario().getEmail(), "🔁 Se renovó el recurso: " + recurso.getTitulo());
+            gestorNotificaciones.enviar(p.getUsuario().getEmail(), "🔁 Se renovó el recurso: " + recurso.getTitulo(), p.getUsuario().getCanalesPreferidos());
 
             if (recurso.esRenovable() && p.puedeRenovarse()) {
                 p.renovar();

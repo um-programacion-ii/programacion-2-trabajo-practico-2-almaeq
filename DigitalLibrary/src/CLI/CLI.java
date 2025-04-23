@@ -1,5 +1,8 @@
 package CLI;
 
+import alertas.HistorialAlertas;
+import alertas.RecordatorioPeriodico;
+import enums.CanalNotificacion;
 import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
 import gestores.*;
@@ -8,9 +11,14 @@ import usuario.Usuario;
 import utils.SimuladorAlertaVencimiento;
 import utils.SimuladorPrestamos;
 import alertas.AlertaVencimiento;
+import utils.SimuladorRecordatorios;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 public class CLI {
@@ -22,8 +30,12 @@ public class CLI {
     private static final GestorPrestamo gestorPrestamo = new GestorPrestamo(gestorRecursos, gestorUsuario,gestorReserva,scanner);
     private static final GestorReportes gestorReportes = new GestorReportes(gestorPrestamo);
     private static final GestorNotificaciones gestorNotificaciones = new GestorNotificaciones();
+    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static void iniciar() {
+        // ⏰ Arranca el sistema de recordatorios cada 24h
+        RecordatorioPeriodico recordatorio = new RecordatorioPeriodico(gestorPrestamo, gestorNotificaciones);
+        scheduler.scheduleAtFixedRate(recordatorio, 0, 1, TimeUnit.DAYS);
         int opcion;
         do {
             mostrarMenu();
@@ -41,10 +53,12 @@ public class CLI {
                 case 6 -> submenuReservas(gestorReserva);
                 case 7 -> submenuReportes(); // 👈 nuevo
                 case 8 -> submenuAlertas();
-                case 9 -> System.out.println("Saliendo...");
+                case 9 -> HistorialAlertas.mostrarHistorial();
+                case 10 -> configurarPreferenciasNotificacion();
+                case 11 -> System.out.println("Saliendo...");
                 default -> System.out.println("❌ Opción inválida.\n");
             }
-        } while (opcion != 9);
+        } while (opcion != 11);
 
         gestorPrestamo.shutdown(); // ✅ cerramos al final del todo
     }
@@ -60,7 +74,9 @@ public class CLI {
         6. Gestionar Reservas
         7. Reportes
         8. Verificar alertas
-        9. Salir
+        9. Mostrar historial de alertas
+        10. Configurar preferencias de notificación
+        11. Salir
         Ingrese una opción:
         """);
     }
@@ -432,7 +448,8 @@ public class CLI {
             === SUBMENÚ DE ALERTAS ===
             1. Verificar vencimientos reales
             2. Simular vencimientos (con datos propios y aislados)
-            3. Volver al menú principal
+            3. Simular recordatorios periódicos (modo aislado)
+            4. Volver al menú principal
         """);
 
             try {
@@ -447,11 +464,12 @@ public class CLI {
                     alerta.verificarYNotificarVencimientos();
                 }
                 case 2 -> SimuladorAlertaVencimiento.ejecutar();
-                case 3 -> System.out.println("↩️ Volviendo al menú principal...\n");
+                case 3 -> SimuladorRecordatorios.ejecutar();
+                case 4 -> System.out.println("↩️ Volviendo al menú principal...\n");
                 default -> System.out.println("❌ Opción inválida.");
             }
 
-        } while (opcion != 3);
+        } while (opcion != 4 );
     }
 
     private static void mostrarRecursosDisponibles() {
@@ -464,4 +482,42 @@ public class CLI {
         }
         System.out.println();
     }
+
+    private static void configurarPreferenciasNotificacion() {
+        System.out.print("🔎 Ingrese el ID del usuario: ");
+        try {
+            int id = Integer.parseInt(scanner.nextLine());
+            Usuario usuario = gestorUsuario.buscarPorId(id);
+            if (usuario == null) {
+                System.out.println("❌ Usuario no encontrado.");
+                return;
+            }
+
+            System.out.println("⚙️ Seleccione los canales de notificación deseados:");
+            System.out.println("1. 📧 Email");
+            System.out.println("2. 📱 SMS");
+            System.out.println("3. Ambos");
+            System.out.print("Opción: ");
+            String opcion = scanner.nextLine().trim();
+
+            switch (opcion) {
+                case "1" -> usuario.setCanalesPreferidos(EnumSet.of(CanalNotificacion.EMAIL));
+                case "2" -> usuario.setCanalesPreferidos(EnumSet.of(CanalNotificacion.SMS));
+                case "3" -> usuario.setCanalesPreferidos(EnumSet.of(CanalNotificacion.EMAIL, CanalNotificacion.SMS));
+                default -> {
+                    System.out.println("❌ Opción inválida.");
+                    return;
+                }
+            }
+
+            System.out.println("✅ Preferencias actualizadas para " + usuario.getNombre() + ": " + usuario.getCanalesPreferidos());
+        } catch (NumberFormatException e) {
+            System.out.println("❌ ID inválido.");
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+        }
+
+        System.out.println("↩️ Volviendo al menú principal...\n"); // 🔁 Este es el fix
+    }
+
 }

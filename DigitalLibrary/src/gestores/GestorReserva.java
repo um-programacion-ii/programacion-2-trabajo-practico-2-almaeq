@@ -20,7 +20,7 @@ public class GestorReserva {
     private final BlockingQueue<Reserva> colaReservas = new PriorityBlockingQueue<>();
     private final List<Reserva> historialReservas = new ArrayList<>();
     private final GestorUsuario gestorUsuario;
-    private final GestorRecursos gestorRecursos;
+    private final GestorRecursos gestorRecursos;;
     private final GestorNotificaciones gestorNotificaciones = new GestorNotificaciones();
     private static final AtomicInteger generadorId = new AtomicInteger(1);
 
@@ -205,11 +205,12 @@ public class GestorReserva {
     public void notificarPrimeraReservaDisponible(RecursoDigital recurso, Scanner scanner, GestorPrestamo gestorPrestamo) {
         Reserva siguiente = getProximaReservaParaRecurso(recurso);
         if (siguiente != null) {
+            Usuario usuario = siguiente.getUsuario();
             String email = siguiente.getUsuario().getEmail();
             gestorNotificaciones.activarPara(email);
             recurso.configurarNotificaciones(gestorNotificaciones.getServicios(), email);
 
-            gestorNotificaciones.enviar(email, "📢 El recurso '" + recurso.getTitulo() + "' está disponible para tu reserva.");
+            gestorNotificaciones.enviar(email, "📢 El recurso '" + recurso.getTitulo() + "' está disponible para tu reserva.", usuario.getCanalesPreferidos());
 
             System.out.printf("👤 Usuario: %s (%s)\n", siguiente.getUsuario().getNombre(), email);
             System.out.printf("¿Deseás tomar el recurso '%s' ahora mismo? (s/n): ", recurso.getTitulo());
