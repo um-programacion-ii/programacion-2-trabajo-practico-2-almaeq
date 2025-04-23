@@ -40,7 +40,8 @@ public class RecordatorioPeriodico implements Runnable {
                 if (mensaje != null && urgencia != null) {
                     String mensajeConSimbolo = urgencia.getSimbolo() + " " + mensaje;
                     System.out.println(mensajeConSimbolo);
-                    gestorNotificaciones.enviar(usuario.getEmail(), mensajeConSimbolo);
+                    gestorNotificaciones.enviar(usuario.getEmail(), mensajeConSimbolo,usuario.getCanalesPreferidos());
+
                     HistorialAlertas.registrar(mensaje);
                 }
             }

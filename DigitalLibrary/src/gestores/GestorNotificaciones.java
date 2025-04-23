@@ -1,11 +1,13 @@
 package gestores;
 
+import enums.CanalNotificacion;
 import servicios.ServicioNotificaciones;
 import servicios.ServicioNotificacionesEmail;
 import servicios.ServicioNotificacionesSMS;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,10 +30,10 @@ public class GestorNotificaciones {
         }
     }
 
-    public void enviar(String destinatario, String mensaje) {
+    public void enviar(String destinatario, String mensaje, Set<CanalNotificacion> canalesPreferidos) {
         List<Callable<Void>> tareas = new ArrayList<>();
         for (ServicioNotificaciones servicio : servicios) {
-            if (servicio.estaActivo(destinatario)) {
+            if (canalesPreferidos.contains(servicio.getCanal()) && servicio.estaActivo(destinatario)) {
                 tareas.add(() -> {
                     servicio.enviarNotificacion(destinatario, mensaje);
                     return null;
@@ -39,7 +41,7 @@ public class GestorNotificaciones {
             }
         }
         try {
-            executorService.invokeAll(tareas); // Espera a que terminen todas
+            executorService.invokeAll(tareas);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

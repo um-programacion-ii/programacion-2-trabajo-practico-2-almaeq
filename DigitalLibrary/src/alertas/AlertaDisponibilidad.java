@@ -27,8 +27,11 @@ public class AlertaDisponibilidad {
             notificador.activarPara(usuario.getEmail());
             recurso.configurarNotificaciones(notificador.getServicios(), usuario.getEmail());
 
-            notificador.enviar(usuario.getEmail(),
-                    "📢 El recurso '" + recurso.getTitulo() + "' está disponible para tu reserva.");
+            notificador.enviar(
+                    usuario.getEmail(),
+                    "📢 El recurso '" + recurso.getTitulo() + "' está disponible para tu reserva.",
+                    usuario.getCanalesPreferidos()
+            );
 
             // Preguntar en consola si desea tomarlo ahora
             System.out.printf("👤 %s, ¿deseás tomar el recurso '%s' ahora? (s/n): ",

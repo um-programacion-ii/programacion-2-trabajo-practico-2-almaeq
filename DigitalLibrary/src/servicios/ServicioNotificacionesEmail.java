@@ -1,5 +1,7 @@
 package servicios;
 
+import enums.CanalNotificacion;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,5 +26,10 @@ public class ServicioNotificacionesEmail implements ServicioNotificaciones {
 
     public void activarNotificaciones(String usuario) {
         usuariosActivos.add(usuario);
+    }
+
+    @Override
+    public CanalNotificacion getCanal() {
+        return CanalNotificacion.EMAIL;
     }
 }

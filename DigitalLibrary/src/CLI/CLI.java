@@ -2,6 +2,7 @@ package CLI;
 
 import alertas.HistorialAlertas;
 import alertas.RecordatorioPeriodico;
+import enums.CanalNotificacion;
 import enums.CategoriaRecurso;
 import enums.EstadoRecurso;
 import gestores.*;
@@ -12,6 +13,7 @@ import utils.SimuladorPrestamos;
 import alertas.AlertaVencimiento;
 import utils.SimuladorRecordatorios;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
@@ -52,10 +54,11 @@ public class CLI {
                 case 7 -> submenuReportes(); // 👈 nuevo
                 case 8 -> submenuAlertas();
                 case 9 -> HistorialAlertas.mostrarHistorial();
-                case 10 -> System.out.println("Saliendo...");
+                case 10 -> configurarPreferenciasNotificacion();
+                case 11 -> System.out.println("Saliendo...");
                 default -> System.out.println("❌ Opción inválida.\n");
             }
-        } while (opcion != 9);
+        } while (opcion != 11);
 
         gestorPrestamo.shutdown(); // ✅ cerramos al final del todo
     }
@@ -72,7 +75,8 @@ public class CLI {
         7. Reportes
         8. Verificar alertas
         9. Mostrar historial de alertas
-        10. Salir
+        10. Configurar preferencias de notificación
+        11. Salir
         Ingrese una opción:
         """);
     }
@@ -478,4 +482,42 @@ public class CLI {
         }
         System.out.println();
     }
+
+    private static void configurarPreferenciasNotificacion() {
+        System.out.print("🔎 Ingrese el ID del usuario: ");
+        try {
+            int id = Integer.parseInt(scanner.nextLine());
+            Usuario usuario = gestorUsuario.buscarPorId(id);
+            if (usuario == null) {
+                System.out.println("❌ Usuario no encontrado.");
+                return;
+            }
+
+            System.out.println("⚙️ Seleccione los canales de notificación deseados:");
+            System.out.println("1. 📧 Email");
+            System.out.println("2. 📱 SMS");
+            System.out.println("3. Ambos");
+            System.out.print("Opción: ");
+            String opcion = scanner.nextLine().trim();
+
+            switch (opcion) {
+                case "1" -> usuario.setCanalesPreferidos(EnumSet.of(CanalNotificacion.EMAIL));
+                case "2" -> usuario.setCanalesPreferidos(EnumSet.of(CanalNotificacion.SMS));
+                case "3" -> usuario.setCanalesPreferidos(EnumSet.of(CanalNotificacion.EMAIL, CanalNotificacion.SMS));
+                default -> {
+                    System.out.println("❌ Opción inválida.");
+                    return;
+                }
+            }
+
+            System.out.println("✅ Preferencias actualizadas para " + usuario.getNombre() + ": " + usuario.getCanalesPreferidos());
+        } catch (NumberFormatException e) {
+            System.out.println("❌ ID inválido.");
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+        }
+
+        System.out.println("↩️ Volviendo al menú principal...\n"); // 🔁 Este es el fix
+    }
+
 }

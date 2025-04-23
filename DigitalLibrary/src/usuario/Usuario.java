@@ -1,10 +1,15 @@
 package usuario;
 
+import enums.CanalNotificacion;
+
+import java.util.EnumSet;
+
 public class Usuario {
     private String nombre;
     private String apellido;
     private String email;
     private int ID;
+    private EnumSet<CanalNotificacion> canalesPreferidos = EnumSet.of(CanalNotificacion.EMAIL); // Por defecto email
 
     public Usuario(String nombre, String apellido, String email, int ID) {
         this.nombre = nombre;
@@ -37,12 +42,18 @@ public class Usuario {
         this.email = email;
     }
 
-    public int getID() {
-        return ID;
-    }
+    public int getID() { return ID; }
 
     public void setID(int ID) {
         this.ID = ID;
+    }
+
+    public EnumSet<CanalNotificacion> getCanalesPreferidos() {
+        return canalesPreferidos;
+    }
+
+    public void setCanalesPreferidos(EnumSet<CanalNotificacion> canalesPreferidos) {
+        this.canalesPreferidos = canalesPreferidos;
     }
 
     public String getNombreCompleto() {

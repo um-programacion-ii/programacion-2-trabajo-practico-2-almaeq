@@ -1,6 +1,7 @@
 package utils;
 
 import alertas.AlertaVencimiento;
+import enums.CanalNotificacion;
 import enums.CategoriaRecurso;
 import enums.EstadoPrestamo;
 import enums.EstadoRecurso;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 public class SimuladorAlertaVencimiento {
 
@@ -39,11 +41,11 @@ public class SimuladorAlertaVencimiento {
         };
 
         GestorNotificaciones notificadorSimulado = new GestorNotificaciones() {
-            @Override
-            public void enviar(String destinatario, String mensaje) {
-                System.out.println("📢 Alerta a " + destinatario + ": " + mensaje);
-            }
-        };
+        @Override
+        public void enviar(String destinatario, String mensaje, Set<CanalNotificacion> canalesPreferidos) {
+            System.out.println("📢 Alerta a " + destinatario + ": " + mensaje);
+        }
+    };
 
         AlertaVencimiento alerta = new AlertaVencimiento(gestorPrestamoSimulado, notificadorSimulado, new Scanner(System.in));        alerta.verificarYNotificarVencimientos();
     }

@@ -46,7 +46,7 @@ public class AlertaVencimiento {
                 if (mensaje != null && nivel != null) {
                     String mensajeConSimbolo = nivel.getSimbolo() + " " + mensaje;
                     System.out.println(mensajeConSimbolo);
-                    gestorNotificaciones.enviar(usuario.getEmail(), mensajeConSimbolo);
+                    gestorNotificaciones.enviar(usuario.getEmail(), mensajeConSimbolo,usuario.getCanalesPreferidos());
                     HistorialAlertas.registrar(mensaje);
                     huboAlertas = true;
 

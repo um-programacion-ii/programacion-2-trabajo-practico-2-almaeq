@@ -1,6 +1,7 @@
 package utils;
 
 import alertas.RecordatorioPeriodico;
+import enums.CanalNotificacion;
 import enums.CategoriaRecurso;
 import enums.EstadoPrestamo;
 import enums.EstadoRecurso;
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 public class SimuladorRecordatorios {
 
@@ -50,10 +52,9 @@ public class SimuladorRecordatorios {
             }
         };
 
-        // Notificador simulado
         GestorNotificaciones gestorNotificaciones = new GestorNotificaciones() {
             @Override
-            public void enviar(String destinatario, String mensaje) {
+            public void enviar(String destinatario, String mensaje, Set<CanalNotificacion> canalesPreferidos) {
                 System.out.println("📢 Alerta a " + destinatario + ": " + mensaje);
             }
         };
