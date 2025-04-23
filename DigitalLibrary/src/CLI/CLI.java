@@ -60,7 +60,9 @@ public class CLI {
             }
         } while (opcion != 11);
 
-        gestorPrestamo.shutdown(); // ✅ cerramos al final del todo
+        gestorPrestamo.shutdown();          // ✅ Cierra el sistema de notificaciones de préstamos
+        gestorReportes.shutdown();          // ✅ Cierra el executor de reportes
+        scheduler.shutdown();               // ✅ Cierra el scheduler de recordatorios periódicos
     }
 
     private static void mostrarMenu() {
@@ -396,12 +398,12 @@ public class CLI {
         int opcion;
         do {
             System.out.println("""
-            === SUBMENÚ DE REPORTES ===
-            1. Recursos más prestados
-            2. Usuarios más activos
-            3. Estadísticas por Categoría
-            4. Volver al menú principal
-            """);
+        === SUBMENÚ DE REPORTES ===
+        1. Recursos más prestados
+        2. Usuarios más activos
+        3. Estadísticas por Categoría
+        4. Volver al menú principal
+        """);
             try {
                 opcion = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
@@ -413,6 +415,7 @@ public class CLI {
                     try {
                         int top = Integer.parseInt(scanner.nextLine());
                         if (top > 0) {
+                            System.out.println("📨 Generando reporte en segundo plano...");
                             gestorReportes.mostrarRecursosMasPrestados(top);
                         } else {
                             System.out.println("⚠️ Debe ser un número mayor a 0.");
@@ -426,6 +429,7 @@ public class CLI {
                     try {
                         int top = Integer.parseInt(scanner.nextLine());
                         if (top > 0) {
+                            System.out.println("📨 Generando reporte en segundo plano...");
                             gestorReportes.mostrarUsuariosMasActivos(top);
                         } else {
                             System.out.println("⚠️ Debe ser un número mayor a 0.");
@@ -434,7 +438,10 @@ public class CLI {
                         System.out.println("❌ Número inválido.");
                     }
                 }
-                case 3 -> gestorReportes.mostrarEstadisticasPorCategoria();
+                case 3 -> {
+                    System.out.println("📨 Generando reporte en segundo plano...");
+                    gestorReportes.mostrarEstadisticasPorCategoria();
+                }
                 case 4 -> System.out.println("↩️ Volviendo al menú principal...");
                 default -> System.out.println("❌ Opción inválida.");
             }
@@ -457,7 +464,6 @@ public class CLI {
             } catch (NumberFormatException e) {
                 opcion = -1;
             }
-
             switch (opcion) {
                 case 1 -> {
                     AlertaVencimiento alerta = new AlertaVencimiento(gestorPrestamo, gestorNotificaciones, scanner);
@@ -468,7 +474,6 @@ public class CLI {
                 case 4 -> System.out.println("↩️ Volviendo al menú principal...\n");
                 default -> System.out.println("❌ Opción inválida.");
             }
-
         } while (opcion != 4 );
     }
 
@@ -492,7 +497,6 @@ public class CLI {
                 System.out.println("❌ Usuario no encontrado.");
                 return;
             }
-
             System.out.println("⚙️ Seleccione los canales de notificación deseados:");
             System.out.println("1. 📧 Email");
             System.out.println("2. 📱 SMS");
@@ -509,14 +513,12 @@ public class CLI {
                     return;
                 }
             }
-
             System.out.println("✅ Preferencias actualizadas para " + usuario.getNombre() + ": " + usuario.getCanalesPreferidos());
         } catch (NumberFormatException e) {
             System.out.println("❌ ID inválido.");
         } catch (Exception e) {
             System.out.println("❌ Error: " + e.getMessage());
         }
-
         System.out.println("↩️ Volviendo al menú principal...\n"); // 🔁 Este es el fix
     }
 
