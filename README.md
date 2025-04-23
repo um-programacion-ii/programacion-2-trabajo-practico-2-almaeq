@@ -248,7 +248,7 @@ Podés ejecutar los simuladores desde el menú principal del sistema:
 - **Resultado esperado**: Aparecen mensajes `ℹ`, `⚠` o `❗` dependiendo de cuántos días falten o hayan pasado del vencimiento.
 
 
-Esto permite probar funcionalidades críticas sin necesidad de modificar los datos reales ni interactuar con un flujo completo del sistema.
+## Esto permite probar funcionalidades críticas sin necesidad de modificar los datos reales ni interactuar con un flujo completo del sistema.
 ---
 
 # 🧪 Pruebas por Módulo
