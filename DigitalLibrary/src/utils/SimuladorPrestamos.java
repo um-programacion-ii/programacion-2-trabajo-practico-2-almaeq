@@ -19,9 +19,9 @@ public class SimuladorPrestamos {
         System.out.println("🧪 Simulando múltiples usuarios compitiendo por el mismo recurso... (modo aislado)");
 
         // 🧪 Crear usuarios simulados
-        Usuario usuario1 = new Usuario("Sim", "Uno", "sim1@demo.com", 100);
-        Usuario usuario2 = new Usuario("Sim", "Dos", "sim2@demo.com", 200);
-        Usuario usuario3 = new Usuario("Sim", "Tres", "sim3@demo.com", 300);
+        Usuario usuario1 = new Usuario("Sim", "Uno", "sim1@demo.com");
+        Usuario usuario2 = new Usuario("Sim", "Dos", "sim2@demo.com");
+        Usuario usuario3 = new Usuario("Sim", "Tres", "sim3@demo.com");
 
         // 🧪 Crear recurso simulado compartido
         RecursoDigital recurso = new RecursoDigital("Recurso Compartido", EstadoRecurso.DISPONIBLE) {

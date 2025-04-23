@@ -29,9 +29,9 @@ public class SimuladorRecordatorios {
         System.out.println("🕒 Hora de ejecución: " + timestamp + "\n");
 
         // Usuarios ficticios
-        Usuario usuario1 = new Usuario("Juan", "Pérez", "usuario1@example.com", 1);
-        Usuario usuario2 = new Usuario("Ana", "López", "usuario2@example.com", 2);
-        Usuario usuario3 = new Usuario("Luis", "Gómez", "usuario3@example.com", 3);
+        Usuario usuario1 = new Usuario("Juan", "Pérez", "usuario1@example.com");
+        Usuario usuario2 = new Usuario("Ana", "López", "usuario2@example.com");
+        Usuario usuario3 = new Usuario("Luis", "Gómez", "usuario3@example.com");
 
         // Recursos simulados
         RecursoDigital recurso1 = recursoSimulado("Libro 1");

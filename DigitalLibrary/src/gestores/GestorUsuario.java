@@ -11,8 +11,8 @@ public class GestorUsuario {
 
     private static final Map<String, Usuario> usuarios = new HashMap<>();
 
-    public static Usuario getUsuario(String nombre, String apellido, String email, int ID) {
-        Usuario nuevo = new Usuario(nombre, apellido, email, ID);
+    public static Usuario getUsuario(String nombre, String apellido, String email) {
+        Usuario nuevo = new Usuario(nombre, apellido, email);
         usuarios.put(email, nuevo);
         return nuevo;
     }
@@ -63,10 +63,8 @@ public class GestorUsuario {
         String apellido = scanner.nextLine();
         System.out.print("Email: ");
         String email = scanner.nextLine();
-        System.out.print("ID (número): ");
-        int id = Integer.parseInt(scanner.nextLine());
 
-        Usuario nuevo = new Usuario(nombre, apellido, email, id);
+        Usuario nuevo = new Usuario(nombre, apellido, email);
         usuarios.put(email, nuevo);
         return nuevo;
     }

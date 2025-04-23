@@ -22,7 +22,7 @@ public class SimuladorAlertaVencimiento {
     public static void ejecutar() {
         System.out.println("🧪 Simulando alertas de vencimiento... (modo aislado)");
 
-        Usuario usuario = new Usuario("Sim", "Usuario", "sim@demo.com", 999);
+        Usuario usuario = new Usuario("Sim", "Usuario", "sim@demo.com");
 
         RecursoDigital recurso1 = recursoSimulado("Recurso 1");
         RecursoDigital recurso2 = recursoSimulado("Recurso 2");
@@ -37,6 +37,34 @@ public class SimuladorAlertaVencimiento {
             @Override
             public List<Prestamo> listar() {
                 return prestamosSimulados;
+            }
+            @Override
+            public Prestamo buscarPorId(int id) {
+                return prestamosSimulados.stream()
+                        .filter(p -> p.getId() == id)
+                        .findFirst()
+                        .orElse(null);
+            }
+            @Override
+            public boolean renovarPrestamo(int id) {
+                Prestamo p = buscarPorId(id);
+                if (p != null && p.estaActivo()) {
+                    System.out.print("📅 Ingrese la nueva fecha de devolución (YYYY-MM-DD): ");
+                    LocalDate nuevaFecha = LocalDate.parse(new Scanner(System.in).nextLine());
+
+                    if (nuevaFecha.isBefore(LocalDate.now())) {
+                        System.out.println("❌ La nueva fecha de devolución no puede ser anterior a hoy.");
+                        return false;
+                    }
+
+                    p.renovar();
+                    p.setFechaDevolucion(nuevaFecha);
+                    System.out.println("✅ Préstamo renovado correctamente. Nueva devolución: " + nuevaFecha);
+                    return true;
+                } else {
+                    System.out.println("❌ Préstamo no encontrado o ya no está activo.");
+                    return false;
+                }
             }
         };
 
